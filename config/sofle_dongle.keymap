@@ -72,7 +72,7 @@
         };
 
         layer_1 {
-            display-name = "FUNCTION";
+            display-name = "FN1";
             bindings = <
 &BOT
 &kp TILDE    &kp F1            &kp F2             &kp F3  &kp F4  &kp F5           &bt BT_CLR  &kp C_MUTE  &kp F6      &kp F7       &kp F8       &kp F9         &kp F10    &kp F11
@@ -86,7 +86,7 @@
         };
 
         layer_2 {
-            display-name = "FUNCTION";
+            display-name = "FN2";
             bindings = <
 &BOT
 &kp TILDE    &kp F1            &kp F2             &kp F3  &kp F4  &kp F5           &bt BT_CLR  &kp C_MUTE  &kp F6      &kp F7       &kp F8       &kp F9         &kp F10    &kp F11
@@ -108,6 +108,8 @@
 &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans
 &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans
             >;
+
+            label = "FN3";
         };
 
         layer_4 {
@@ -119,6 +121,8 @@
 &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans
 &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans
             >;
+
+            label = "FN4";
         };
 
         layer_5 {
@@ -130,6 +134,8 @@
 &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans
 &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans
             >;
+
+            label = "FN5";
         };
 
         layer_6 {
