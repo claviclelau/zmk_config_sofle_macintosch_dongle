@@ -27,8 +27,8 @@ layers:
   - I
   - O
   - P
-  - ENTER
-  - CAPS
+  - DELETE
+  - LEFT CONTROL
   - A
   - S
   - D
@@ -41,7 +41,7 @@ layers:
   - K
   - L
   - ;
-  - \
+  - ''''
   - LSHFT
   - Z
   - X
@@ -57,18 +57,86 @@ layers:
   - ','
   - .
   - /
-  - '='
+  - \
   - LCTRL
   - LGUI
-  - LALT
   - SPACE
   - LOWER
-  - LOWER
-  - SPACE
+  - FN3
+  - FN4
   - RAISE
-  - '`'
-  - '-'
+  - SPACE
+  - DEVICE
+  - RIGHT ALT
   LOWER:
+  - '&bootloader'
+  - '~'
+  - F1
+  - F2
+  - F3
+  - F4
+  - F5
+  - BT CLR
+  - MUTE
+  - F6
+  - F7
+  - F8
+  - F9
+  - F10
+  - F11
+  - '`'
+  - '{'
+  - '}'
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - HOME
+  - UP
+  - END
+  - _
+  - +
+  - F12
+  - LEFT CONTROL
+  - '['
+  - ']'
+  - BACK
+  - FORWARD
+  - {t: ▽, type: trans}
+  - '&mkp RCLK'
+  - '&mkp RCLK'
+  - LEFT
+  - DOWN
+  - RIGHT
+  - '-'
+  - '='
+  - {t: ▽, type: trans}
+  - LSHFT
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - '&bl BL_DEC'
+  - '&bl BL_INC'
+  - PAGE UP
+  - PAGE DOWN
+  - BACK
+  - FORWARD
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - LEFT CONTROL
+  - LGUI
+  - ENTER
+  - {t: LOWER, type: held}
+  - FN3
+  - FN4
+  - RAISE
+  - SPACE
+  - DEVICE
+  - RIGHT ALT
+  RAISE:
   - '&bootloader'
   - '`'
   - F1
@@ -80,197 +148,267 @@ layers:
   - MUTE
   - F6
   - F7
-  - /
-  - '*'
-  - '-'
-  - DEL
-  - TAB
-  - {t: ▽, type: trans}
-  - UP
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - OUT TOG
   - F8
-  - '7'
-  - '8'
-  - '9'
-  - HOME
-  - ENTER
-  - CAPS
-  - LEFT
-  - DOWN
-  - RIGHT
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - '&mkp RCLK'
-  - '&mkp RCLK'
+  - F9
   - F10
-  - '4'
-  - '5'
-  - '6'
-  - '?'
-  - '|'
-  - LSHFT
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - RGB TOG
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - '&bl BL_DEC'
-  - '&bl BL_INC'
-  - F12
-  - '1'
-  - '2'
-  - '3'
-  - _
-  - +
-  - '&bootloader'
-  - LGUI
-  - LALT
-  - SPACE
-  - {t: LOWER, type: held}
-  - LOWER
-  - '0'
-  - {t: MOUSE, h: toggle}
-  - .
-  - '&bootloader'
-  RAISE:
-  - '&bootloader'
-  - '`'
-  - F1
-  - F2
-  - F3
-  - F4
-  - F5
-  - BT CLR
-  - MUTE
-  - ''
-  - ''
-  - ''
-  - UP
-  - ''
-  - BSPC
+  - F11
   - TAB
   - {t: ▽, type: trans}
-  - UP
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
-  - OUT TOG
-  - ''
-  - ''
-  - LEFT
-  - DOWN
-  - RIGHT
-  - ''
-  - CAPS
-  - LEFT
-  - DOWN
-  - RIGHT
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - F12
+  - LEFT CONTROL
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
   - '&mkp RCLK'
   - ''
-  - '&mkp LCLK'
-  - '&mkp RCLK'
-  - ''
-  - ''
-  - ''
-  - ''
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
   - LSHFT
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
-  - RGB TOG
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
   - ''
   - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - LEFT CONTROL
   - LGUI
-  - LALT
+  - ENTER
+  - LOWER
+  - FN3
+  - FN4
+  - {t: RAISE, type: held}
   - SPACE
-  - LOWER
-  - LOWER
-  - '&mkp MB2'
+  - DEVICE
+  - RIGHT ALT
+  MOUSE: ['&bootloader', ESC, '1', '2', '3', '4', '5', BT CLR, MUTE, '', '', '', '', '', BSPC, TAB, '', '', '', '&msc SCRL_UP', T, '', '', '', '', '', '', LEFT CONTROL,
+    '', '', '&msc SCRL_LEFT', '&msc SCRL_DOWN', '&msc SCRL_RIGHT', '&mkp LCLK', '&mkp LCLK', '', '&mkp LCLK', '', '', '', '', LSHFT, '', '', '', '&mkp LCLK', '&mkp
+      RCLK', '&msc SCRL_DOWN', '&msc SCRL_UP', '&mkp LCLK', '&mkp RCLK', '', '&mkp RCLK', '', '', '', '', LCTRL, LGUI, LALT, '&mkp LCLK', '&mkp LCLK', '&mkp RCLK',
+    '&mkp RCLK', SPACE, '', '']
+  FN3:
+  - '&bootloader'
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
   - {type: held}
   - ''
   - ''
-  MOUSE:
+  - ''
+  - ''
+  - ''
+  FN4:
   - '&bootloader'
-  - ESC
-  - '1'
-  - '2'
-  - '3'
-  - '4'
-  - '5'
-  - BT CLR
-  - MUTE
   - ''
   - ''
   - ''
   - ''
   - ''
-  - BSPC
-  - TAB
-  - Q
-  - W
-  - E
-  - R
-  - T
-  - ''
-  - '&mkp MB3'
   - ''
   - ''
   - ''
   - ''
-  - CAPS
-  - A
-  - S
-  - D
-  - F
-  - ''
-  - '&mkp LCLK'
-  - '&mkp LCLK'
-  - ''
-  - '&mkp LCLK'
   - ''
   - ''
   - ''
   - ''
-  - LSHFT
-  - Z
-  - X
-  - C
-  - V
-  - B
-  - '&msc SCRL_DOWN'
-  - '&msc SCRL_UP'
   - ''
   - ''
   - ''
-  - '&mkp RCLK'
-  - ''
-  - '&msc SCRL_UP'
   - ''
   - ''
-  - LCTRL
-  - LGUI
-  - LALT
-  - SPACE
-  - {t: QWERTY, h: toggle}
-  - {t: QWERTY, h: toggle}
-  - SPACE
-  - {t: QWERTY, h: toggle}
   - ''
-  - '&msc SCRL_DOWN'
-  RESERVE: ['&bootloader', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '',
-    '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '']
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - {type: held}
+  - ''
+  - ''
+  - ''
+  - ''
+  DEVICE:
+  - '&bootloader'
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - RGB TOG
+  - OUT TOG
+  - ''
+  - OUT USB
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - '&bl BL_TOG'
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - OUT BLE
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - {t: DEVICE, type: held}
+  - ''
