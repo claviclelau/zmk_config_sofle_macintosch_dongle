@@ -167,8 +167,8 @@ layers:
   - LEFT CONTROL
   - Alt+TAB
   - Alt+Sft+TAB
-  - Gui+RIGHT
-  - Gui+RIGHT
+  - '&gui_left'
+  - '&gui_right'
   - Gui+SPACE
   - '&mkp RCLK'
   - ''
@@ -204,10 +204,10 @@ layers:
   - SPACE
   - FN1
   - RIGHT ALT
-  MOUSE: ['&bootloader', ESC, '1', '2', '3', '4', '5', BT CLR, MUTE, '', '', '', '', '', BSPC, '', '', '', '', '&msc SCRL_UP', T, '', '', '', '', '', '', '', '',
-    '', '&msc SCRL_LEFT', '&msc SCRL_DOWN', '&msc SCRL_RIGHT', '&mkp LCLK', '&mkp LCLK', '', '&mkp LCLK', '', '', '', '', '', '', '', '', '&mkp LCLK', '&mkp RCLK',
-    '&msc SCRL_DOWN', '&msc SCRL_UP', '&mkp LCLK', '&mkp RCLK', '', '&mkp RCLK', '', '', '', '', '', '', ENTER, '&mkp LCLK', '&mkp LCLK', '&mkp RCLK', '&mkp RCLK',
-    SPACE, '', '']
+  MOUSE: ['&bootloader', ESC, '1', '2', '3', '4', '5', BT CLR, MUTE, '', '', '', '', '', BSPC, TAB, '', '', '', '&msc SCRL_UP', T, '', '', '', '', '', '', LEFT CONTROL,
+    '', '', '&msc SCRL_LEFT', '&msc SCRL_DOWN', '&msc SCRL_RIGHT', '&mkp LCLK', '&mkp LCLK', '', '&mkp LCLK', '', '', '', '', LEFT SHIFT, '', '', '', '&mkp LCLK',
+    '&mkp RCLK', '&msc SCRL_DOWN', '&msc SCRL_UP', '&mkp LCLK', '&mkp RCLK', '', '&mkp RCLK', '', '', '', '', LEFT GUI, '', ENTER, '&mkp LCLK', '&mkp LCLK', '&mkp
+      RCLK', '&mkp RCLK', SPACE, '', '']
   FN:
   - '&bootloader'
   - ''
