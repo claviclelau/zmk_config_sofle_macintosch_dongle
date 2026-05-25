@@ -97,6 +97,40 @@
         };
     };
 
+    macros {
+        gui_left: gui_left {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings =
+                <&macro_press>,
+                <&kp LEFT_GUI>,
+                <&macro_tap>,
+                <&kp LEFT>,
+                <&macro_release>,
+                <&kp LEFT_GUI>;
+
+            label = "GUI_LEFT";
+            tap-ms = <50>;
+            wait-ms = <80>;
+        };
+
+        gui_right: gui_right {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings =
+                <&macro_press>,
+                <&kp LEFT_GUI>,
+                <&macro_tap>,
+                <&kp RIGHT>,
+                <&macro_release>,
+                <&kp LEFT_GUI>;
+
+            label = "GUI_RIGHT";
+            tap-ms = <50>;
+            wait-ms = <80>;
+        };
+    };
+
     keymap {
         compatible = "zmk,keymap";
 
@@ -134,11 +168,11 @@
             display-name = "RAISE";
             bindings = <
 &bootloader
-&kp GRAVE         &kp F1       &kp F2           &kp F3         &kp F4            &kp F5         &bt BT_CLR  &kp C_MUTE  &kp F6  &kp F7         &kp F8  &kp F9   &kp F10  &kp F11
-&kp TAB           &trans       &trans           &trans         &kp LA(SPACE)     &trans         &trans      &trans      &trans  &trans         &trans  &kp F12
-&kp LEFT_CONTROL  &kp LA(TAB)  &kp LA(LS(TAB))  &kp LG(RIGHT)  &kp LG(RIGHT)     &kp LG(SPACE)  &mkp RCLK   &none       &trans  &trans         &trans  &trans   &trans   &trans
-&kp LSHFT         &trans       &trans           &trans         &trans            &trans         &trans      &trans      &none   &none          &trans  &trans   &trans   &trans   &trans  &trans
-&kp LEFT_GUI      &mo 4        &kp ENTER        &mo 1          &kp LEFT_CONTROL  &mo 6          &mo 2       &kp SPACE   &mo 5   &kp RIGHT_ALT
+&kp GRAVE         &kp F1       &kp F2           &kp F3     &kp F4            &kp F5         &bt BT_CLR  &kp C_MUTE  &kp F6  &kp F7         &kp F8  &kp F9   &kp F10  &kp F11
+&kp TAB           &trans       &trans           &trans     &kp LA(SPACE)     &trans         &trans      &trans      &trans  &trans         &trans  &kp F12
+&kp LEFT_CONTROL  &kp LA(TAB)  &kp LA(LS(TAB))  &gui_left  &gui_right        &kp LG(SPACE)  &mkp RCLK   &none       &trans  &trans         &trans  &trans   &trans   &trans
+&kp LSHFT         &trans       &trans           &trans     &trans            &trans         &trans      &trans      &none   &none          &trans  &trans   &trans   &trans   &trans  &trans
+&kp LEFT_GUI      &mo 4        &kp ENTER        &mo 1      &kp LEFT_CONTROL  &mo 6          &mo 2       &kp SPACE   &mo 5   &kp RIGHT_ALT
             >;
         };
 
@@ -146,11 +180,11 @@
             display-name = "MOUSE";
             bindings = <
 &bootloader
-&kp ESC      &kp N1  &kp N2     &kp N3          &kp N4          &kp N5           &bt BT_CLR      &kp C_MUTE    &none      &none      &none  &none      &none  &kp BSPC
-&none        &none   &none      &none           &msc SCRL_UP    &kp T            &none           &none         &none      &none      &none  &none
-&none        &none   &none      &msc SCRL_LEFT  &msc SCRL_DOWN  &msc SCRL_RIGHT  &mkp LCLK       &mkp LCLK     &none      &mkp LCLK  &none  &none      &none  &none
-&none        &none   &none      &none           &mkp LCLK       &mkp RCLK        &msc SCRL_DOWN  &msc SCRL_UP  &mkp LCLK  &mkp RCLK  &none  &mkp RCLK  &none  &none     &none  &none
-&none        &none   &kp ENTER  &mkp LCLK       &mkp LCLK       &mkp RCLK        &mkp RCLK       &kp SPACE     &none      &none
+&kp ESC           &kp N1  &kp N2     &kp N3          &kp N4          &kp N5           &bt BT_CLR      &kp C_MUTE    &none      &none      &none  &none      &none  &kp BSPC
+&kp TAB           &none   &none      &none           &msc SCRL_UP    &kp T            &none           &none         &none      &none      &none  &none
+&kp LEFT_CONTROL  &none   &none      &msc SCRL_LEFT  &msc SCRL_DOWN  &msc SCRL_RIGHT  &mkp LCLK       &mkp LCLK     &none      &mkp LCLK  &none  &none      &none  &none
+&kp LEFT_SHIFT    &none   &none      &none           &mkp LCLK       &mkp RCLK        &msc SCRL_DOWN  &msc SCRL_UP  &mkp LCLK  &mkp RCLK  &none  &mkp RCLK  &none  &none     &none  &none
+&kp LEFT_GUI      &none   &kp ENTER  &mkp LCLK       &mkp LCLK       &mkp RCLK        &mkp RCLK       &kp SPACE     &none      &none
             >;
         };
 
