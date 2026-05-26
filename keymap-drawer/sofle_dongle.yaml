@@ -41,7 +41,7 @@ layers:
   - K
   - L
   - ;
-  - ''''
+  - {t: '''', h: FN}
   - LSHFT
   - Z
   - X
@@ -155,9 +155,9 @@ layers:
   - TAB
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - Alt+SPACE
-  - {t: ▽, type: trans}
+  - Alt+LEFT
+  - Alt+RIGHT
+  - Gui+UP
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
@@ -167,9 +167,9 @@ layers:
   - LEFT CONTROL
   - Alt+TAB
   - Alt+Sft+TAB
-  - '&gui_left'
-  - '&gui_right'
-  - Gui+SPACE
+  - Gui+LEFT
+  - Gui+RIGHT
+  - Gui+DOWN
   - '&mkp RCLK'
   - ''
   - {t: ▽, type: trans}
@@ -228,6 +228,7 @@ layers:
   - ''
   - ''
   - ''
+  - Alt+SPACE
   - ''
   - ''
   - ''
@@ -237,29 +238,10 @@ layers:
   - ''
   - ''
   - ''
+  - Ctl+Alt+S
   - ''
   - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
+  - Alt+G
   - ''
   - ''
   - ''
@@ -268,6 +250,24 @@ layers:
   - ''
   - ''
   - {type: held}
+  - ''
+  - ''
+  - ''
+  - Gui+C
+  - Ctl+Alt+V
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
   - ''
   - ''
   - ''
