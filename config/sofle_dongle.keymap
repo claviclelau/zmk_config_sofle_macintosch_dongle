@@ -208,11 +208,11 @@
             display-name = "FN";
             bindings = <
 &bootloader
-&none        &none  &none                                 &none      &none                                 &none                     &none  &none  &none  &none  &none  &none  &none  &none
-&none        &none  &none                                 &none      &mod_with_latency LEFT_ALT SPACE      &none                     &none  &none  &none  &none  &none  &none
-&none        &none  &mod_with_latency LEFT_CONTROL LA(S)  &none      &none                                 &mod_with_latency LALT G  &none  &none  &none  &none  &none  &none  &none  &none
-&none        &none  &none                                 &kp LG(C)  &mod_with_latency LEFT_CONTROL LA(V)  &none                     &none  &none  &none  &none  &none  &none  &none  &none  &none  &none
-&none        &none  &none                                 &none      &none                                 &none                     &none  &none  &none  &none
+&none        &none  &none                             &none      &none                             &none                     &none  &none  &none  &none  &none  &none  &none  &none
+&none        &none  &none                             &none      &mod_with_latency LEFT_ALT SPACE  &none                     &none  &none  &none  &none  &none  &none
+&none        &none  &mod_with_latency LC(LEFT_ALT) S  &none      &none                             &mod_with_latency LALT G  &none  &none  &none  &none  &none  &none  &none  &none
+&none        &none  &none                             &kp LG(C)  &mod_with_latency LC(LEFT_ALT) V  &none                     &none  &none  &none  &none  &none  &none  &none  &none  &none  &none
+&none        &none  &none                             &none      &none                             &none                     &none  &none  &none  &none
             >;
         };
 
