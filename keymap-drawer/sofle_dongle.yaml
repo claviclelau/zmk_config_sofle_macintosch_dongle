@@ -238,7 +238,7 @@ layers:
   - ''
   - ''
   - ''
-  - '&mod_with_latency LC(LEFT_ALT) S'
+  - '&mod_alt_latency LEFT_CONTROL S'
   - ''
   - ''
   - '&mod_with_latency LALT G'
@@ -254,7 +254,7 @@ layers:
   - ''
   - ''
   - Gui+C
-  - '&mod_with_latency LC(LEFT_ALT) V'
+  - '&mod_alt_latency LEFT_CONTROL V'
   - ''
   - ''
   - ''
