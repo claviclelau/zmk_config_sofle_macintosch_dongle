@@ -145,6 +145,24 @@
                 <&macro_release>,
                 <&kp MACRO_PLACEHOLDER>;
         };
+
+        mod_alt_latency: mod_alt_latency {
+            compatible = "zmk,behavior-macro-two-param";
+            #binding-cells = <2>;
+            wait-ms = <30>;
+            tap-ms = <30>;
+            label = "MOD_WITH_LATENCY";
+            bindings
+                = <&macro_param_1to1>
+                , <&macro_press &kp MACRO_PLACEHOLDER>
+                , <&macro_press &kp LEFT_ALT>
+                , <&macro_param_2to1>
+                , <&macro_tap &kp MACRO_PLACEHOLDER>
+                , <&macro_release &kp LEFT_ALT>
+                , <&macro_param_1to1>
+                , <&macro_release &kp MACRO_PLACEHOLDER>
+                ;
+        };
     };
 
     keymap {
