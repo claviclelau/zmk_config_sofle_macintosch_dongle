@@ -136,14 +136,14 @@
             wait-ms = <70>;
             tap-ms = <70>;
             label = "MOD_WITH_LATENCY";
-            bindings
-                = <&macro_param_1to1>
-                , <&macro_press &kp MACRO_PLACEHOLDER>
-                , <&macro_param_2to1>
-                , <&macro_tap &kp MACRO_PLACEHOLDER>
-                , <&macro_param_1to1>
-                , <&macro_release &kp MACRO_PLACEHOLDER>
-                ;
+            bindings =
+                <&macro_param_1to1>,
+                <&macro_press>,
+                <&kp MACRO_PLACEHOLDER &macro_param_2to1>,
+                <&macro_tap>,
+                <&kp MACRO_PLACEHOLDER &macro_param_1to1>,
+                <&macro_release>,
+                <&kp MACRO_PLACEHOLDER>;
         };
     };
 
@@ -168,11 +168,11 @@
             display-name = "LOWER";
             bindings = <
 &bootloader
-&kp TILDE         &kp F1            &kp F2             &kp F3        &kp F4            &kp F5  &bt BT_CLR  &kp C_MUTE  &kp F6      &kp F7         &kp F8       &kp F9         &kp F10       &kp F11
-&kp GRAVE         &kp LEFT_BRACE    &kp RIGHT_BRACE    &trans        &trans            &trans  &kp HOME    &kp UP      &kp END     &kp UNDER      &kp PLUS     &kp F12
-&kp LEFT_CONTROL  &kp LEFT_BRACKET  &kp RIGHT_BRACKET  &kp LA(LEFT)  &kp LA(RIGHT)     &trans  &mkp RCLK   &mkp RCLK   &kp LEFT    &kp DOWN       &kp RIGHT    &kp MINUS      &kp EQUAL     &trans
-&kp LSHFT         &trans            &trans             &trans        &trans            &trans  &trans      &trans      &bl BL_DEC  &bl BL_INC     &kp PAGE_UP  &kp PAGE_DOWN  &kp RA(LEFT)  &kp RA(RIGHT)  &trans  &trans
-&kp LEFT_GUI      &mo 4             &kp ENTER          &mo 1         &kp LEFT_CONTROL  &mo 6   &mo 2       &kp SPACE   &mo 5       &kp RIGHT_ALT
+&kp TILDE         &kp F1            &kp F2             &kp F3                           &kp F4                            &kp F5  &bt BT_CLR  &kp C_MUTE  &kp F6      &kp F7         &kp F8       &kp F9         &kp F10                           &kp F11
+&kp GRAVE         &kp LEFT_BRACE    &kp RIGHT_BRACE    &trans                           &trans                            &trans  &kp HOME    &kp UP      &kp END     &kp UNDER      &kp PLUS     &kp F12
+&kp LEFT_CONTROL  &kp LEFT_BRACKET  &kp RIGHT_BRACKET  &mod_with_latency LEFT_ALT LEFT  &mod_with_latency LEFT_ALT RIGHT  &trans  &mkp RCLK   &mkp RCLK   &kp LEFT    &kp DOWN       &kp RIGHT    &kp MINUS      &kp EQUAL                         &trans
+&kp LSHFT         &trans            &trans             &trans                           &trans                            &trans  &trans      &trans      &bl BL_DEC  &bl BL_INC     &kp PAGE_UP  &kp PAGE_DOWN  &mod_with_latency RIGHT_ALT LEFT  &mod_with_latency RIGHT_ALT RIGHT  &trans  &trans
+&kp LEFT_GUI      &mo 4             &kp ENTER          &mo 1                            &kp LEFT_CONTROL                  &mo 6   &mo 2       &kp SPACE   &mo 5       &kp RIGHT_ALT
             >;
 
             sensor-bindings =
@@ -184,11 +184,11 @@
             display-name = "RAISE";
             bindings = <
 &bootloader
-&kp GRAVE         &kp F1       &kp F2           &kp F3        &kp F4            &kp F5        &bt BT_CLR  &kp C_MUTE  &kp F6  &kp F7         &kp F8  &kp F9   &kp F10  &kp F11
-&kp TAB           &trans       &trans           &kp LA(LEFT)  &kp LA(RIGHT)     &kp LG(UP)    &trans      &trans      &trans  &trans         &trans  &kp F12
-&kp LEFT_CONTROL  &kp LA(TAB)  &kp LA(LS(TAB))  &kp LG(LEFT)  &kp LG(RIGHT)     &kp LG(DOWN)  &mkp RCLK   &none       &trans  &trans         &trans  &trans   &trans   &trans
-&kp LSHFT         &trans       &trans           &trans        &trans            &trans        &trans      &trans      &none   &none          &trans  &trans   &trans   &trans   &trans  &trans
-&kp LEFT_GUI      &mo 4        &kp ENTER        &mo 1         &kp LEFT_CONTROL  &mo 6         &mo 2       &kp SPACE   &mo 5   &kp RIGHT_ALT
+&kp GRAVE         &kp F1  &kp F2     &kp F3                           &kp F4                            &kp F5        &bt BT_CLR  &kp C_MUTE  &kp F6  &kp F7         &kp F8  &kp F9   &kp F10  &kp F11
+&kp TAB           &trans  &trans     &mod_with_latency LEFT_ALT LEFT  &mod_with_latency LEFT_ALT RIGHT  &kp LG(UP)    &trans      &trans      &trans  &trans         &trans  &kp F12
+&kp LEFT_CONTROL  &none   &none      &kp LG(LEFT)                     &kp LG(RIGHT)                     &kp LG(DOWN)  &mkp RCLK   &none       &trans  &trans         &trans  &trans   &trans   &trans
+&kp LSHFT         &trans  &trans     &trans                           &trans                            &trans        &trans      &trans      &none   &none          &trans  &trans   &trans   &trans   &trans  &trans
+&kp LEFT_GUI      &mo 4   &kp ENTER  &mo 1                            &kp LEFT_CONTROL                  &mo 6         &mo 2       &kp SPACE   &mo 5   &kp RIGHT_ALT
             >;
         };
 
@@ -208,11 +208,11 @@
             display-name = "FN";
             bindings = <
 &bootloader
-&none        &none  &none          &none      &none          &none      &none  &none  &none  &none  &none  &none  &none  &none
-&none        &none  &none          &none      &kp LA(SPACE)  &none      &none  &none  &none  &none  &none  &none
-&none        &none  &kp LC(LA(S))  &none      &none          &kp LA(G)  &none  &none  &none  &none  &none  &none  &none  &none
-&none        &none  &none          &kp LG(C)  &kp LC(LA(V))  &none      &none  &none  &none  &none  &none  &none  &none  &none  &none  &none
-&none        &none  &none          &none      &none          &none      &none  &none  &none  &none
+&none        &none  &none                                 &none      &none                                 &none                     &none  &none  &none  &none  &none  &none  &none  &none
+&none        &none  &none                                 &none      &mod_with_latency LEFT_ALT SPACE      &none                     &none  &none  &none  &none  &none  &none
+&none        &none  &mod_with_latency LEFT_CONTROL LA(S)  &none      &none                                 &mod_with_latency LALT G  &none  &none  &none  &none  &none  &none  &none  &none
+&none        &none  &none                                 &kp LG(C)  &mod_with_latency LEFT_CONTROL LA(V)  &none                     &none  &none  &none  &none  &none  &none  &none  &none  &none  &none
+&none        &none  &none                                 &none      &none                                 &none                     &none  &none  &none  &none
             >;
         };
 
