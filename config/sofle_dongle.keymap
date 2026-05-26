@@ -129,6 +129,24 @@
             tap-ms = <50>;
             wait-ms = <80>;
         };
+
+        mod_with_latency: mod_with_latency {
+            compatible = "zmk,behavior-macro-two-param";
+            #binding-cells = <2>;
+            wait-ms = <70>;
+            tap-ms = <70>;
+            label = "MOD_WITH_LATENCY";
+            bindings
+                = <&macro_param_1to1>
+                , <&macro_press &kp MACRO_PLACEHOLDER>
+                , <&macro_param_2to1>
+                , <&macro_tap &kp MACRO_PLACEHOLDER>
+                , <&macro_param_1to1>
+                , <&macro_release &kp MACRO_PLACEHOLDER>
+                ;
+        };
+    };
+};
     };
 
     keymap {
