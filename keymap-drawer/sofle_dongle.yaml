@@ -99,8 +99,8 @@ layers:
   - LEFT CONTROL
   - '['
   - ']'
-  - Alt+LEFT
-  - Alt+RIGHT
+  - '&mod_with_latency LEFT_ALT LEFT'
+  - '&mod_with_latency LEFT_ALT RIGHT'
   - {t: ▽, type: trans}
   - '&mkp RCLK'
   - '&mkp RCLK'
@@ -122,8 +122,8 @@ layers:
   - '&bl BL_INC'
   - PAGE UP
   - PAGE DOWN
-  - AltGr+LEFT
-  - AltGr+RIGHT
+  - '&mod_with_latency RIGHT_ALT LEFT'
+  - '&mod_with_latency RIGHT_ALT RIGHT'
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
   - LEFT GUI
@@ -155,8 +155,8 @@ layers:
   - TAB
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
-  - Alt+LEFT
-  - Alt+RIGHT
+  - '&mod_with_latency LEFT_ALT LEFT'
+  - '&mod_with_latency LEFT_ALT RIGHT'
   - Gui+UP
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
@@ -165,8 +165,8 @@ layers:
   - {t: ▽, type: trans}
   - F12
   - LEFT CONTROL
-  - Alt+TAB
-  - Alt+Sft+TAB
+  - ''
+  - ''
   - Gui+LEFT
   - Gui+RIGHT
   - Gui+DOWN
@@ -228,7 +228,7 @@ layers:
   - ''
   - ''
   - ''
-  - Alt+SPACE
+  - '&mod_with_latency LEFT_ALT SPACE'
   - ''
   - ''
   - ''
@@ -238,10 +238,10 @@ layers:
   - ''
   - ''
   - ''
-  - Ctl+Alt+S
+  - '&mod_with_latency LEFT_CONTROL LA(S)'
   - ''
   - ''
-  - Alt+G
+  - '&mod_with_latency LALT G'
   - ''
   - ''
   - ''
@@ -254,7 +254,7 @@ layers:
   - ''
   - ''
   - Gui+C
-  - Ctl+Alt+V
+  - '&mod_with_latency LEFT_CONTROL LA(V)'
   - ''
   - ''
   - ''
