@@ -98,38 +98,6 @@
     };
 
     macros {
-        gui_left: gui_left {
-            compatible = "zmk,behavior-macro";
-            #binding-cells = <0>;
-            bindings =
-                <&macro_press>,
-                <&kp LEFT_GUI>,
-                <&macro_tap>,
-                <&kp LEFT>,
-                <&macro_release>,
-                <&kp LEFT_GUI>;
-
-            label = "GUI_LEFT";
-            tap-ms = <50>;
-            wait-ms = <80>;
-        };
-
-        gui_right: gui_right {
-            compatible = "zmk,behavior-macro";
-            #binding-cells = <0>;
-            bindings =
-                <&macro_press>,
-                <&kp LEFT_GUI>,
-                <&macro_tap>,
-                <&kp RIGHT>,
-                <&macro_release>,
-                <&kp LEFT_GUI>;
-
-            label = "GUI_RIGHT";
-            tap-ms = <50>;
-            wait-ms = <80>;
-        };
-
         mod_with_latency: mod_with_latency {
             compatible = "zmk,behavior-macro-two-param";
             #binding-cells = <2>;
@@ -149,8 +117,8 @@
         mod_alt_latency: mod_alt_latency {
             compatible = "zmk,behavior-macro-two-param";
             #binding-cells = <2>;
-            wait-ms = <30>;
-            tap-ms = <30>;
+            wait-ms = <50>;
+            tap-ms = <50>;
             label = "MOD_WITH_LATENCY";
             bindings =
                 <&macro_param_1to1>,
