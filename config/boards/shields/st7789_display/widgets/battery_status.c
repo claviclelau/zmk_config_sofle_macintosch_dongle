@@ -37,14 +37,14 @@ static uint8_t previous_battery_level_1 = 0;
 // last value would otherwise stay frozen on screen, which is misleading. To
 // show the empty "--%" placeholder instead, each half has a delayable work that
 // is rescheduled every time a fresh report for that source arrives. If no
-// report is seen within BATTERY_STALE_TIMEOUT_S, the half is treated as
+// report is seen within battery_stale_timeout_s, the half is treated as
 // disconnected and blanked.
 //
-// Note: a peripheral only sends a battery update when its integer percentage
-// changes, so the timeout must be generous - otherwise a connected half whose
-// level happens to be steady would be blanked by mistake. Tune this if a
-// connected half ever shows "--%".
-#define BATTERY_STALE_TIMEOUT_S 600
+// The timeout is derived from the battery report interval
+// (CONFIG_ZMK_BATTERY_REPORT_INTERVAL) so that the conf value is the single
+// source of truth: it is two report intervals, i.e. long enough to tolerate one
+// missed report before declaring a half stale. Both halves share this const.
+static const int battery_stale_timeout_s = 2 * CONFIG_ZMK_BATTERY_REPORT_INTERVAL;
 
 static struct k_work_delayable battery_stale_work_0;
 static struct k_work_delayable battery_stale_work_1;
@@ -164,14 +164,14 @@ void battery_status_update_cb(struct peripheral_battery_state state) {
         // A real report means this half is connected: refresh its watchdog.
         // Done before the dedup check below so a steady (unchanged) value still
         // counts as "alive".
-        k_work_reschedule(&battery_stale_work_0, K_SECONDS(BATTERY_STALE_TIMEOUT_S));
+        k_work_reschedule(&battery_stale_work_0, K_SECONDS(battery_stale_timeout_s));
         if (state.level == previous_battery_level_0) {
             return;
         }
         previous_battery_level_0 = state.level;
         battery_state_0 = state;
     } else {
-        k_work_reschedule(&battery_stale_work_1, K_SECONDS(BATTERY_STALE_TIMEOUT_S));
+        k_work_reschedule(&battery_stale_work_1, K_SECONDS(battery_stale_timeout_s));
         if (state.level == previous_battery_level_1) {
             return;
         }
@@ -184,7 +184,7 @@ void battery_status_update_cb(struct peripheral_battery_state state) {
     }
 }
 
-// Called when a half has gone quiet for BATTERY_STALE_TIMEOUT_S: blank it.
+// Called when a half has gone quiet for battery_stale_timeout_s: blank it.
 // Resetting the cached/previous level to 0 makes set_battery_symbol() draw the
 // "--%" placeholder and lets a later real report repaint normally.
 static void battery_blank_source(uint8_t source) {
