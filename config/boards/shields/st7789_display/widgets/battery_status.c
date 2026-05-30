@@ -136,14 +136,30 @@ void set_battery_symbol() {
 }
 
 void battery_status_update_cb(struct peripheral_battery_state state) {
+    // ZMK reports a state-of-charge of 0 for a peripheral that is
+    // disconnected. On reconnect this transient/empty reading would otherwise
+    // overwrite the last known good value and show a bogus low percentage
+    // (e.g. "04%") until the next real report arrives. Ignore it and keep the
+    // previous value instead.
+    if (state.level == 0) {
+        return;
+    }
+
     if (state.source == 0) {
+        if (state.level == previous_battery_level_0) {
+            return;
+        }
+        previous_battery_level_0 = state.level;
         battery_state_0 = state;
     } else {
+        if (state.level == previous_battery_level_1) {
+            return;
+        }
+        previous_battery_level_1 = state.level;
         battery_state_1 = state;
     }
-    if (battery_widget_initialized) {
-    }
-    if (battery_widget_running) {
+
+    if (battery_widget_initialized && battery_widget_running) {
         set_battery_symbol();
     }
 }
