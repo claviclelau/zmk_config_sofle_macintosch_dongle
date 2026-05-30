@@ -18,6 +18,8 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 #include <zmk/events/split_peripheral_status_changed.h>
 #include <zmk/usb.h>
 #include <zmk/ble.h>
+#include <zmk/activity.h>
+#include <zmk/events/activity_state_changed.h>
 
 #include "peripheral_status.h"
 
@@ -46,6 +48,9 @@ static const lv_img_dsc_t *bunny_frames[] = {
 #define BUNNY_FRAME_COUNT (sizeof(bunny_frames) / sizeof(bunny_frames[0]))
 
 // ==================== 图片切换控制 ====================
+// 图片切换间隔（秒）。仅在键盘处于活动状态时切换，空闲时停止以节省电量。
+#define IMG_SWITCH_INTERVAL_S 300
+
 static uint8_t current_img_index = 0;
 static struct k_work_delayable img_switch_work;
 
@@ -91,9 +96,30 @@ static void switch_image(struct k_work *work) {
         lv_img_set_src(art, bunny_frames[current_img_index]);
     }
 
-    // 重新调度 60 秒
-    k_work_schedule(&img_switch_work, K_SECONDS(60));
+    // 仅在活动状态下重新调度，空闲时停止切换
+    if (zmk_activity_get_state() == ZMK_ACTIVITY_ACTIVE) {
+        k_work_schedule(&img_switch_work, K_SECONDS(IMG_SWITCH_INTERVAL_S));
+    }
 }
+
+// ================= 活动状态监听（空闲时停止图片切换） =================
+static int img_activity_state_listener(const zmk_event_t *eh) {
+    const struct zmk_activity_state_changed *ev = as_zmk_activity_state_changed(eh);
+    if (ev == NULL) {
+        return -ENOTSUP;
+    }
+
+    if (ev->state == ZMK_ACTIVITY_ACTIVE) {
+        k_work_schedule(&img_switch_work, K_SECONDS(IMG_SWITCH_INTERVAL_S));
+    } else {
+        k_work_cancel_delayable(&img_switch_work);
+    }
+
+    return 0;
+}
+
+ZMK_LISTENER(widget_img_activity, img_activity_state_listener);
+ZMK_SUBSCRIPTION(widget_img_activity, zmk_activity_state_changed);
 
 // ================= 电池状态 =================
 static void set_battery_status(struct zmk_widget_status *widget,
@@ -172,7 +198,7 @@ int zmk_widget_status_init(struct zmk_widget_status *widget, lv_obj_t *parent) {
     static bool work_initialized = false;
     if (!work_initialized) {
         k_work_init_delayable(&img_switch_work, switch_image);
-        k_work_schedule(&img_switch_work, K_SECONDS(60));
+        k_work_schedule(&img_switch_work, K_SECONDS(IMG_SWITCH_INTERVAL_S));
         work_initialized = true;
     }
 
