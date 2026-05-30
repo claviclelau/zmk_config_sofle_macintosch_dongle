@@ -32,6 +32,23 @@ static uint16_t *scaled_bitmap_1;
 static uint8_t previous_battery_level_0 = 0;
 static uint8_t previous_battery_level_1 = 0;
 
+// Per-half staleness watchdog. The dongle (central) does not receive an event
+// when a half disconnects - it simply stops getting battery reports and the
+// last value would otherwise stay frozen on screen, which is misleading. To
+// show the empty "--%" placeholder instead, each half has a delayable work that
+// is rescheduled every time a fresh report for that source arrives. If no
+// report is seen within BATTERY_STALE_TIMEOUT_S, the half is treated as
+// disconnected and blanked.
+//
+// Note: a peripheral only sends a battery update when its integer percentage
+// changes, so the timeout must be generous - otherwise a connected half whose
+// level happens to be steady would be blanked by mistake. Tune this if a
+// connected half ever shows "--%".
+#define BATTERY_STALE_TIMEOUT_S 600
+
+static struct k_work_delayable battery_stale_work_0;
+static struct k_work_delayable battery_stale_work_1;
+
 #ifdef CONFIG_SHOW_SINGLE_BATTERY
 static const uint16_t font_offset = 6;
 static const uint16_t single_battery_offset = 60;
@@ -136,22 +153,25 @@ void set_battery_symbol() {
 }
 
 void battery_status_update_cb(struct peripheral_battery_state state) {
-    // ZMK reports a state-of-charge of 0 for a peripheral that is
-    // disconnected. On reconnect this transient/empty reading would otherwise
-    // overwrite the last known good value and show a bogus low percentage
-    // (e.g. "04%") until the next real report arrives. Ignore it and keep the
-    // previous value instead.
+    // A state-of-charge of 0 is a transient/empty reading (e.g. right after a
+    // reconnect, before the first real report). Ignore it so it doesn't
+    // overwrite the last known good value with a bogus low percentage.
     if (state.level == 0) {
         return;
     }
 
     if (state.source == 0) {
+        // A real report means this half is connected: refresh its watchdog.
+        // Done before the dedup check below so a steady (unchanged) value still
+        // counts as "alive".
+        k_work_reschedule(&battery_stale_work_0, K_SECONDS(BATTERY_STALE_TIMEOUT_S));
         if (state.level == previous_battery_level_0) {
             return;
         }
         previous_battery_level_0 = state.level;
         battery_state_0 = state;
     } else {
+        k_work_reschedule(&battery_stale_work_1, K_SECONDS(BATTERY_STALE_TIMEOUT_S));
         if (state.level == previous_battery_level_1) {
             return;
         }
@@ -163,6 +183,26 @@ void battery_status_update_cb(struct peripheral_battery_state state) {
         set_battery_symbol();
     }
 }
+
+// Called when a half has gone quiet for BATTERY_STALE_TIMEOUT_S: blank it.
+// Resetting the cached/previous level to 0 makes set_battery_symbol() draw the
+// "--%" placeholder and lets a later real report repaint normally.
+static void battery_blank_source(uint8_t source) {
+    if (source == 0) {
+        battery_state_0.level = 0;
+        previous_battery_level_0 = 0;
+    } else {
+        battery_state_1.level = 0;
+        previous_battery_level_1 = 0;
+    }
+
+    if (battery_widget_initialized && battery_widget_running) {
+        set_battery_symbol();
+    }
+}
+
+static void battery_stale_work_0_cb(struct k_work *work) { battery_blank_source(0); }
+static void battery_stale_work_1_cb(struct k_work *work) { battery_blank_source(1); }
 
 static struct peripheral_battery_state battery_status_get_state(const zmk_event_t *eh) {
     const struct zmk_peripheral_battery_state_changed *ev =
@@ -195,6 +235,9 @@ void zmk_widget_peripheral_battery_status_init() {
     uint16_t bitmap_size = (font_width * scale) * (font_height * scale);
 
     scaled_bitmap_1 = k_malloc(bitmap_size * 2 * sizeof(uint16_t));
+
+    k_work_init_delayable(&battery_stale_work_0, battery_stale_work_0_cb);
+    k_work_init_delayable(&battery_stale_work_1, battery_stale_work_1_cb);
 
     widget_battery_status_init();
 }
