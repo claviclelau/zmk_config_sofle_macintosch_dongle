@@ -32,27 +32,6 @@ static uint16_t *scaled_bitmap_1;
 static uint8_t previous_battery_level_0 = 0;
 static uint8_t previous_battery_level_1 = 0;
 
-// Exponentially-weighted moving average used to smooth the noisy per-half
-// battery readings before they are displayed. The raw state-of-charge wobbles
-// by several percent due to single-sample ADC noise and load-induced voltage
-// sag, so without filtering the number jumps around (and can appear to rise
-// without charging). The accumulator is kept in fixed point (<<8) so small
-// changes are not lost to integer truncation and the value still converges.
-// alpha = 1/4: each new sample contributes a quarter, giving a time constant of
-// roughly four reports.
-static int32_t battery_ewma_0 = -1; // <0 means uninitialized
-static int32_t battery_ewma_1 = -1;
-
-static uint8_t battery_smooth(int32_t *acc, uint8_t raw) {
-    int32_t raw_fp = (int32_t)raw << 8;
-    if (*acc < 0) {
-        *acc = raw_fp;
-    } else {
-        *acc += (raw_fp - *acc) / 4;
-    }
-    return (uint8_t)((*acc + 128) >> 8);
-}
-
 #ifdef CONFIG_SHOW_SINGLE_BATTERY
 static const uint16_t font_offset = 6;
 static const uint16_t single_battery_offset = 60;
@@ -167,14 +146,12 @@ void battery_status_update_cb(struct peripheral_battery_state state) {
     }
 
     if (state.source == 0) {
-        state.level = battery_smooth(&battery_ewma_0, state.level);
         if (state.level == previous_battery_level_0) {
             return;
         }
         previous_battery_level_0 = state.level;
         battery_state_0 = state;
     } else {
-        state.level = battery_smooth(&battery_ewma_1, state.level);
         if (state.level == previous_battery_level_1) {
             return;
         }
