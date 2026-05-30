@@ -62,6 +62,38 @@
 
 / {
     behaviors {
+        mkp_ml: mouse_key_press_ml {
+            compatible = "zmk,behavior-mouse-key-press";
+            #binding-cells = <1>;
+            display-name = "Mouse Key Press (Mouse Layer)";
+        };
+
+        msc_ml: mouse_scroll_ml {
+            compatible = "zmk,behavior-input-two-axis";
+            #binding-cells = <1>;
+            display-name = "Mouse Scroll (Mouse Layer)";
+            x-input-code = <INPUT_REL_HWHEEL>;
+            y-input-code = <INPUT_REL_WHEEL>;
+            time-to-max-speed-ms = <300>;
+            acceleration-exponent = <0>;
+        };
+    };
+
+    mkp_ml_listener: mkp_ml_listener {
+        compatible = "zmk,input-listener";
+        device = <&mkp_ml>;
+        input-processors = <&zip_temp_layer 3 600>;
+    };
+
+    msc_ml_listener: msc_ml_listener {
+        compatible = "zmk,input-listener";
+        device = <&msc_ml>;
+        input-processors = <&zip_temp_layer 3 600>;
+    };
+};
+
+/ {
+    behaviors {
         td0: tap_dance_0 {
             compatible = "zmk,behavior-tap-dance";
             #binding-cells = <0>;
@@ -186,9 +218,9 @@
 &bootloader
 &kp ESC           &kp N1  &kp N2        &kp N3     &kp N4     &kp N5     &bt BT_CLR      &kp C_MUTE    &kp N6     &kp N7     &kp N8  &kp N9   &kp N0     &kp BSPC
 &kp TAB           &kp Q   &kp W         &kp E      &kp R      &kp T      &kp Y           &kp U         &kp I      &kp O      &kp P   &kp DEL
-&kp LEFT_CONTROL  &kp A   &kp S         &kp D      &kp F      &kp G      &mkp LCLK       &mkp LCLK     &kp H      &kp J      &kp K   &kp L    &kp SEMI   &kp SINGLE_QUOTE
-&kp LEFT_SHIFT    &kp Z   &kp X         &kp C      &kp V      &kp B      &msc SCRL_DOWN  &msc SCRL_UP  &mkp LCLK  &mkp RCLK  &kp N   &kp M    &kp COMMA  &kp PERIOD        &kp SLASH  &kp BACKSLASH
-&kp LEFT_GUI      &none   &msc SCRL_UP  &mkp LCLK  &mkp LCLK  &mkp RCLK  &msc SCRL_DOWN  &kp SPACE     &none      &none
+&kp LEFT_CONTROL  &kp A   &kp S         &kp D      &kp F      &kp G      &mkp_ml LCLK       &mkp_ml LCLK     &kp H      &kp J      &kp K   &kp L    &kp SEMI   &kp SINGLE_QUOTE
+&kp LEFT_SHIFT    &kp Z   &kp X         &kp C      &kp V      &kp B      &msc_ml SCRL_DOWN  &msc_ml SCRL_UP  &mkp_ml LCLK  &mkp_ml RCLK  &kp N   &kp M    &kp COMMA  &kp PERIOD        &kp SLASH  &kp BACKSLASH
+&kp LEFT_GUI      &none   &msc_ml SCRL_UP  &mkp_ml LCLK  &mkp_ml LCLK  &mkp_ml RCLK  &msc_ml SCRL_DOWN  &kp SPACE     &none      &none
             >;
         };
 
