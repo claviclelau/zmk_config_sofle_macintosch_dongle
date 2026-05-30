@@ -205,8 +205,8 @@ layers:
   - FN1
   - RIGHT ALT
   MOUSE: ['&bootloader', ESC, '1', '2', '3', '4', '5', BT CLR, MUTE, '6', '7', '8', '9', '0', BSPC, TAB, Q, W, E, R, T, Y, U, I, O, P, DEL, LEFT CONTROL, A, S, D,
-    F, G, '&mkp LCLK', '&mkp LCLK', H, J, K, L, ;, '''', LEFT SHIFT, Z, X, C, V, B, '&msc SCRL_DOWN', '&msc SCRL_UP', '&mkp LCLK', '&mkp RCLK', N, M, ',', ., /, \,
-    LEFT GUI, '', '&msc SCRL_UP', '&mkp LCLK', '&mkp LCLK', '&mkp RCLK', '&msc SCRL_DOWN', SPACE, '', '']
+    F, G, '&mkp_ml LCLK', '&mkp_ml LCLK', H, J, K, L, ;, '''', LEFT SHIFT, Z, X, C, V, B, '&msc_ml SCRL_DOWN', '&msc_ml SCRL_UP', '&mkp_ml LCLK', '&mkp_ml RCLK',
+    N, M, ',', ., /, \, LEFT GUI, '', '&msc_ml SCRL_UP', '&mkp_ml LCLK', '&mkp_ml LCLK', '&mkp_ml RCLK', '&msc_ml SCRL_DOWN', SPACE, '', '']
   FN:
   - '&bootloader'
   - ''
