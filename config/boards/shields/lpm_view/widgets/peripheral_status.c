@@ -136,9 +136,24 @@ static void battery_status_update_cb(struct battery_status_state state) {
     SYS_SLIST_FOR_EACH_CONTAINER(&widgets, widget, node) { set_battery_status(widget, state); }
 }
 
+// Exponentially-weighted moving average to smooth the noisy battery reading
+// before it is displayed. See st7789_display battery_status.c for the rationale;
+// alpha = 1/4 and the accumulator is kept in fixed point (<<8) so it converges.
+static int32_t battery_ewma = -1; // <0 means uninitialized
+
+static uint8_t battery_smooth(uint8_t raw) {
+    int32_t raw_fp = (int32_t)raw << 8;
+    if (battery_ewma < 0) {
+        battery_ewma = raw_fp;
+    } else {
+        battery_ewma += (raw_fp - battery_ewma) / 4;
+    }
+    return (uint8_t)((battery_ewma + 128) >> 8);
+}
+
 static struct battery_status_state battery_status_get_state(const zmk_event_t *eh) {
     return (struct battery_status_state){
-        .level = zmk_battery_state_of_charge(),
+        .level = battery_smooth(zmk_battery_state_of_charge()),
 #if IS_ENABLED(CONFIG_USB_DEVICE_STACK)
         .usb_present = zmk_usb_is_powered(),
 #endif
