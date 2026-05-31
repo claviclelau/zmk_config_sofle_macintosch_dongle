@@ -220,7 +220,7 @@
 &kp TAB           &kp Q   &kp W         &kp E      &kp R      &kp T      &kp Y           &kp U         &kp I      &kp O      &kp P   &kp DEL
 &kp LEFT_CONTROL  &kp A   &kp S         &kp D      &kp F      &kp G      &mkp_ml LCLK       &mkp_ml LCLK     &kp H      &kp J      &kp K   &kp L    &kp SEMI   &kp SINGLE_QUOTE
 &kp LEFT_SHIFT    &kp Z   &kp X         &kp C      &kp V      &kp B      &msc_ml SCRL_DOWN  &msc_ml SCRL_UP  &mkp_ml LCLK  &mkp_ml RCLK  &kp N   &kp M    &kp COMMA  &kp PERIOD        &kp SLASH  &kp BACKSLASH
-&kp LEFT_GUI      &none   &msc_ml SCRL_UP  &mkp_ml LCLK  &mkp_ml LCLK  &mkp_ml RCLK  &msc_ml SCRL_DOWN  &kp SPACE     &none      &none
+&kp LEFT_GUI      &none   &kp ENTER  &mkp_ml LCLK  &msc_ml SCRL_UP  &mkp_ml RCLK  &msc_ml SCRL_DOWN  &kp SPACE     &none      &none
             >;
         };
 
