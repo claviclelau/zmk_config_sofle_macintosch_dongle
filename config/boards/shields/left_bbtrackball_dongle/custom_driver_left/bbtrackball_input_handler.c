@@ -59,16 +59,23 @@ static struct k_work_q bbtrackball_work_q;
 #define ARROW_TRIGGER_THRESHOLD 4
 #define ARROW_REPEAT_MS 35
 
+/* Default trackball action is scroll; higher SCROLL_DIV = slower scroll */
+#define SCROLL_DIV 4
+
 /* =========================================================
  * Runtime State
  * ========================================================= */
 
 static bool moved = false;
 static bool space_pressed = false;
+static bool ctrl_pressed = false;
 static bool arrow_key_pressed = false;
 
 static int dx_acc = 0;
 static int dy_acc = 0;
+
+static int scroll_acc_x = 0;
+static int scroll_acc_y = 0;
 
 static uint32_t last_move_time = 0;
 static uint32_t last_arrow_trigger = 0;
@@ -153,6 +160,10 @@ static int space_listener_cb(const zmk_event_t *eh) {
 
     if (ev->position == 32) {
         arrow_key_pressed = ev->state;
+    }
+
+    if (ev->position == 27) {
+        ctrl_pressed = ev->state;
     }
 
     if (ev->position == 61) {
@@ -266,14 +277,29 @@ static void bbtrackball_work_handler(struct k_work *work) {
         return;
     }
 
-    if (space_pressed || capslock) {
-        input_report_rel(dev, INPUT_REL_HWHEEL, -dx, false, K_NO_WAIT);
-        input_report_rel(dev, INPUT_REL_WHEEL, dy, true, K_NO_WAIT);
+    /* Hold either Control (home-row pos 27 / thumb pos 61) or CapsLock -> move cursor */
+    if (space_pressed || ctrl_pressed || capslock) {
+        input_report_rel(dev, INPUT_REL_X, -dx, false, K_NO_WAIT);
+        input_report_rel(dev, INPUT_REL_Y, -dy, true, K_NO_WAIT);
         return;
     }
 
-    input_report_rel(dev, INPUT_REL_X, -dx, false, K_NO_WAIT);
-    input_report_rel(dev, INPUT_REL_Y, -dy, true, K_NO_WAIT);
+    /* Default -> 4-way scroll with smoothing */
+    scroll_acc_x += -dx;
+    scroll_acc_y += dy;
+
+    int sx = scroll_acc_x / SCROLL_DIV;
+    int sy = scroll_acc_y / SCROLL_DIV;
+
+    scroll_acc_x %= SCROLL_DIV;
+    scroll_acc_y %= SCROLL_DIV;
+
+    if (sx) {
+        input_report_rel(dev, INPUT_REL_HWHEEL, sx, false, K_NO_WAIT);
+    }
+    if (sy) {
+        input_report_rel(dev, INPUT_REL_WHEEL, sy, true, K_NO_WAIT);
+    }
 }
 
 /* =========================================================
