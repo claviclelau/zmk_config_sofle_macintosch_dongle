@@ -62,11 +62,11 @@ layers:
   - FN
   - ENTER
   - LOWER
-  - LEFT CONTROL
-  - DEVICE
+  - '&mkp LCLK'
+  - '&mkp RCLK'
   - RAISE
   - SPACE
-  - FN1
+  - DEVICE
   - RIGHT ALT
   LOWER:
   - '&bootloader'
@@ -130,11 +130,11 @@ layers:
   - FN
   - ENTER
   - {t: LOWER, type: held}
-  - LEFT CONTROL
-  - DEVICE
+  - '&mkp LCLK'
+  - '&mkp RCLK'
   - RAISE
   - SPACE
-  - FN1
+  - DEVICE
   - RIGHT ALT
   RAISE:
   - '&bootloader'
@@ -198,15 +198,15 @@ layers:
   - FN
   - ENTER
   - LOWER
-  - LEFT CONTROL
-  - DEVICE
+  - '&mkp LCLK'
+  - '&mkp RCLK'
   - {t: RAISE, type: held}
   - SPACE
-  - FN1
+  - DEVICE
   - RIGHT ALT
   MOUSE: ['&bootloader', ESC, '1', '2', '3', '4', '5', BT CLR, MUTE, '6', '7', '8', '9', '0', BSPC, TAB, Q, W, E, R, T, Y, U, I, O, P, DEL, LEFT CONTROL, A, S, D,
     F, G, '&mkp_ml LCLK', '&mkp_ml LCLK', H, J, K, L, ;, '''', LEFT SHIFT, Z, X, C, V, B, '&msc_ml SCRL_DOWN', '&msc_ml SCRL_UP', '&mkp_ml LCLK', '&mkp_ml RCLK',
-    N, M, ',', ., /, \, LEFT GUI, '', ENTER, '&mkp_ml LCLK', '&msc_ml SCRL_UP', '&mkp_ml RCLK', '&msc_ml SCRL_DOWN', SPACE, '', RIGHT ALT]
+    N, M, ',', ., /, \, LEFT GUI, '', ENTER, LOWER, '&mkp LCLK', '&mkp RCLK', RAISE, SPACE, '', RIGHT ALT]
   FN:
   - '&bootloader'
   - ''
@@ -275,74 +275,6 @@ layers:
   - ''
   - ''
   - ''
-  FN1:
-  - '&bootloader'
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - {type: held}
-  - ''
   DEVICE:
   - '&bootloader'
   - ''
@@ -406,8 +338,8 @@ layers:
   - ''
   - ''
   - ''
-  - {t: DEVICE, type: held}
+  - DEVICE
   - ''
   - ''
-  - ''
+  - {type: held}
   - ''
