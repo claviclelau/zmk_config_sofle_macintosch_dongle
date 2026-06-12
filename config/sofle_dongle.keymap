@@ -174,11 +174,11 @@
             display-name = "QWERTY";
             bindings = <
 &bootloader
-&kp ESC           &kp N1  &kp N2     &kp N3  &kp N4            &kp N5  &kp C_MUTE  &kp C_MUTE  &kp N6         &kp N7         &kp N8  &kp N9      &kp N0     &kp BSPC
-&kp TAB           &kp Q   &kp W      &kp E   &kp R             &kp T   &kp Y       &kp U       &kp I          &kp O          &kp P   &kp DELETE
-&kp LEFT_CONTROL  &kp A   &kp S      &kp D   &kp F             &kp G   &mkp LCLK   &mkp LCLK   &kp H          &kp J          &kp K   &kp L       &kp SEMI   &lt 4 SINGLE_QUOTE
-&kp LSHFT         &kp Z   &kp X      &kp C   &kp V             &kp B   &kp PG_DN   &kp PG_UP   &mt LBRC LBKT  &mt RBRC RBKT  &kp N   &kp M       &kp COMMA  &kp DOT             &kp FSLH  &kp BACKSLASH
-&kp LEFT_WIN      &mo 4   &kp ENTER  &mo 1   &kp LEFT_CONTROL  &mo 6   &mo 2       &kp SPACE   &mo 5          &kp RIGHT_ALT
+&kp ESC           &kp N1  &kp N2     &kp N3  &kp N4     &kp N5     &kp C_MUTE  &kp C_MUTE  &kp N6         &kp N7         &kp N8  &kp N9      &kp N0     &kp BSPC
+&kp TAB           &kp Q   &kp W      &kp E   &kp R      &kp T      &kp Y       &kp U       &kp I          &kp O          &kp P   &kp DELETE
+&kp LEFT_CONTROL  &kp A   &kp S      &kp D   &kp F      &kp G      &mkp LCLK   &mkp LCLK   &kp H          &kp J          &kp K   &kp L       &kp SEMI   &lt 4 SINGLE_QUOTE
+&kp LSHFT         &kp Z   &kp X      &kp C   &kp V      &kp B      &kp PG_DN   &kp PG_UP   &mt LBRC LBKT  &mt RBRC RBKT  &kp N   &kp M       &kp COMMA  &kp DOT             &kp FSLH  &kp BACKSLASH
+&kp LEFT_WIN      &mo 4   &kp ENTER  &mo 1   &mkp LCLK  &mkp RCLK  &mo 2       &kp SPACE   &mo 5          &kp RIGHT_ALT
             >;
 
             sensor-bindings = <&BLE_encoder>, <&inc_dec_kp C_VOL_UP C_VOL_DN>;
@@ -188,11 +188,11 @@
             display-name = "LOWER";
             bindings = <
 &bootloader
-&kp TILDE         &kp F1            &kp F2             &kp F3                           &kp F4                            &kp F5  &bt BT_CLR  &kp C_MUTE  &kp F6      &kp F7         &kp F8       &kp F9         &kp F10                           &kp F11
-&kp GRAVE         &kp LEFT_BRACE    &kp RIGHT_BRACE    &trans                           &trans                            &trans  &kp HOME    &kp UP      &kp END     &kp UNDER      &kp PLUS     &kp F12
-&kp LEFT_CONTROL  &kp LEFT_BRACKET  &kp RIGHT_BRACKET  &mod_with_latency LEFT_ALT LEFT  &mod_with_latency LEFT_ALT RIGHT  &trans  &mkp RCLK   &mkp RCLK   &kp LEFT    &kp DOWN       &kp RIGHT    &kp MINUS      &kp EQUAL                         &trans
-&kp LSHFT         &trans            &trans             &trans                           &trans                            &trans  &trans      &trans      &bl BL_DEC  &bl BL_INC     &kp PAGE_UP  &kp PAGE_DOWN  &mod_with_latency RIGHT_ALT LEFT  &mod_with_latency RIGHT_ALT RIGHT  &trans  &trans
-&kp LEFT_GUI      &mo 4             &kp ENTER          &mo 1                            &kp LEFT_CONTROL                  &mo 6   &mo 2       &kp SPACE   &mo 5       &kp RIGHT_ALT
+&kp TILDE         &kp F1            &kp F2             &kp F3                           &kp F4                            &kp F5     &bt BT_CLR  &kp C_MUTE  &kp F6      &kp F7         &kp F8       &kp F9         &kp F10                           &kp F11
+&kp GRAVE         &kp LEFT_BRACE    &kp RIGHT_BRACE    &trans                           &trans                            &trans     &kp HOME    &kp UP      &kp END     &kp UNDER      &kp PLUS     &kp F12
+&kp LEFT_CONTROL  &kp LEFT_BRACKET  &kp RIGHT_BRACKET  &mod_with_latency LEFT_ALT LEFT  &mod_with_latency LEFT_ALT RIGHT  &trans     &mkp RCLK   &mkp RCLK   &kp LEFT    &kp DOWN       &kp RIGHT    &kp MINUS      &kp EQUAL                         &trans
+&kp LSHFT         &trans            &trans             &trans                           &trans                            &trans     &trans      &trans      &bl BL_DEC  &bl BL_INC     &kp PAGE_UP  &kp PAGE_DOWN  &mod_with_latency RIGHT_ALT LEFT  &mod_with_latency RIGHT_ALT RIGHT  &trans  &trans
+&kp LEFT_GUI      &mo 4             &kp ENTER          &mo 1                            &mkp LCLK                         &mkp RCLK  &mo 2       &kp SPACE   &mo 5       &kp RIGHT_ALT
             >;
 
             sensor-bindings =
@@ -208,7 +208,7 @@
 &kp TAB           &trans  &trans     &mod_with_latency LEFT_ALT LEFT  &mod_with_latency LEFT_ALT RIGHT  &kp LG(UP)    &trans      &trans      &trans  &trans         &trans  &kp F12
 &kp LEFT_CONTROL  &none   &none      &kp LG(LEFT)                     &kp LG(RIGHT)                     &kp LG(DOWN)  &mkp RCLK   &none       &trans  &trans         &trans  &trans   &trans   &trans
 &kp LSHFT         &trans  &trans     &trans                           &trans                            &trans        &trans      &trans      &none   &none          &trans  &trans   &trans   &trans   &trans  &trans
-&kp LEFT_GUI      &mo 4   &kp ENTER  &mo 1                            &kp LEFT_CONTROL                  &mo 6         &mo 2       &kp SPACE   &mo 5   &kp RIGHT_ALT
+&kp LEFT_GUI      &mo 4   &kp ENTER  &mo 1                            &mkp LCLK                         &mkp RCLK     &mo 2       &kp SPACE   &mo 5   &kp RIGHT_ALT
             >;
         };
 
@@ -216,11 +216,11 @@
             display-name = "MOUSE";
             bindings = <
 &bootloader
-&kp ESC           &kp N1  &kp N2     &kp N3        &kp N4           &kp N5        &bt BT_CLR         &kp C_MUTE       &kp N6        &kp N7         &kp N8  &kp N9   &kp N0     &kp BSPC
-&kp TAB           &kp Q   &kp W      &kp E         &kp R            &kp T         &kp Y              &kp U            &kp I         &kp O          &kp P   &kp DEL
-&kp LEFT_CONTROL  &kp A   &kp S      &kp D         &kp F            &kp G         &mkp_ml LCLK       &mkp_ml LCLK     &kp H         &kp J          &kp K   &kp L    &kp SEMI   &kp SINGLE_QUOTE
-&kp LEFT_SHIFT    &kp Z   &kp X      &kp C         &kp V            &kp B         &msc_ml SCRL_DOWN  &msc_ml SCRL_UP  &mkp_ml LCLK  &mkp_ml RCLK   &kp N   &kp M    &kp COMMA  &kp PERIOD        &kp SLASH  &kp BACKSLASH
-&kp LEFT_GUI      &none   &kp ENTER  &mkp_ml LCLK  &msc_ml SCRL_UP  &mkp_ml RCLK  &msc_ml SCRL_DOWN  &kp SPACE        &none         &kp RIGHT_ALT
+&kp ESC           &kp N1  &kp N2     &kp N3  &kp N4     &kp N5     &bt BT_CLR         &kp C_MUTE       &kp N6        &kp N7         &kp N8  &kp N9   &kp N0     &kp BSPC
+&kp TAB           &kp Q   &kp W      &kp E   &kp R      &kp T      &kp Y              &kp U            &kp I         &kp O          &kp P   &kp DEL
+&kp LEFT_CONTROL  &kp A   &kp S      &kp D   &kp F      &kp G      &mkp_ml LCLK       &mkp_ml LCLK     &kp H         &kp J          &kp K   &kp L    &kp SEMI   &kp SINGLE_QUOTE
+&kp LEFT_SHIFT    &kp Z   &kp X      &kp C   &kp V      &kp B      &msc_ml SCRL_DOWN  &msc_ml SCRL_UP  &mkp_ml LCLK  &mkp_ml RCLK   &kp N   &kp M    &kp COMMA  &kp PERIOD        &kp SLASH  &kp BACKSLASH
+&kp LEFT_GUI      &none   &kp ENTER  &mo 1   &mkp LCLK  &mkp RCLK  &mo 2              &kp SPACE        &none         &kp RIGHT_ALT
             >;
         };
 
@@ -236,18 +236,6 @@
             >;
         };
 
-        fn1_layer {
-            display-name = "FN1";
-            bindings = <
-&bootloader
-&none        &none  &none  &none  &none  &none  &none  &none  &none  &none  &none  &none  &none  &none
-&none        &none  &none  &none  &none  &none  &none  &none  &none  &none  &none  &none
-&none        &none  &none  &none  &none  &none  &none  &none  &none  &none  &none  &none  &none  &none
-&none        &none  &none  &none  &none  &none  &none  &none  &none  &none  &none  &none  &none  &none  &none  &none
-&none        &none  &none  &none  &none  &none  &none  &none  &none  &none
-            >;
-        };
-
         device_layer {
             display-name = "DEVICE";
             bindings = <
@@ -256,7 +244,7 @@
 &none        &none  &none  &none  &rgb_ug RGB_TOG  &out OUT_TOG  &none  &out OUT_USB  &none  &none  &none  &none
 &none        &none  &none  &none  &none            &none         &none  &none         &none  &none  &none  &bl BL_TOG  &none  &none
 &none        &none  &none  &none  &none            &out OUT_BLE  &none  &none         &none  &none  &none  &none       &none  &none  &none  &none
-&none        &none  &none  &none  &none            &mo 6         &none  &none         &none  &none
+&none        &none  &none  &none  &none            &mo 5         &none  &none         &none  &none
             >;
         };
     };
