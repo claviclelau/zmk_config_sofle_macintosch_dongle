@@ -12,6 +12,9 @@
 #include <zephyr/logging/log.h>
 
 #include <zmk/backlight.h>
+#include <zmk/activity.h>
+#include <zmk/event_manager.h>
+#include <zmk/events/activity_state_changed.h>
 
 #include "custom_led.h" // ★ 新增
 
@@ -124,6 +127,29 @@ static void poll_handler(struct k_work *work) {
 
 /* === Public API === */
 uint8_t custom_led_get_last_valid_brightness(void) { return last_valid_brt; }
+
+/* === Activity listener: stop polling and force LED off while asleep === */
+static int custom_led_activity_cb(const zmk_event_t *eh) {
+    const struct zmk_activity_state_changed *ev = as_zmk_activity_state_changed(eh);
+    if (!ev)
+        return ZMK_EV_EVENT_BUBBLE;
+
+    if (ev->state == ZMK_ACTIVITY_SLEEP) {
+        k_work_cancel_delayable(&poll_work);
+        k_work_cancel_delayable(&auto_off_work);
+        k_work_cancel_delayable(&fade_work);
+        fade_step = -1;
+        apply_led(0);
+    } else if (ev->state == ZMK_ACTIVITY_ACTIVE) {
+        last_brt = 255;
+        k_work_reschedule(&poll_work, K_NO_WAIT);
+    }
+
+    return ZMK_EV_EVENT_BUBBLE;
+}
+
+ZMK_LISTENER(custom_led_activity, custom_led_activity_cb);
+ZMK_SUBSCRIPTION(custom_led_activity, zmk_activity_state_changed);
 
 /* === Init === */
 static int init_led_follow(void) {

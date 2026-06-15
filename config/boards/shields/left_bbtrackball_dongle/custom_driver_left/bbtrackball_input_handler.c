@@ -19,8 +19,10 @@
 #include <stdlib.h>
 
 #include <zmk/hid.h>
+#include <zmk/activity.h>
 #include <zmk/events/hid_indicators_changed.h>
 #include <zmk/events/position_state_changed.h>
+#include <zmk/events/activity_state_changed.h>
 
 LOG_MODULE_REGISTER(bbtrackball_input_handler, LOG_LEVEL_INF);
 
@@ -301,6 +303,51 @@ static void bbtrackball_work_handler(struct k_work *work) {
         input_report_rel(dev, INPUT_REL_WHEEL, sy, true, K_NO_WAIT);
     }
 }
+
+/* =========================================================
+ * Low-power handling (deep sleep)
+ *
+ * The four direction GPIOs are normally held with internal pull-ups.
+ * If the trackball encoder holds any of these lines low, the pull-up
+ * sources a continuous current (~250uA per line on the nRF52). Because
+ * pin configuration is retained when the SoC enters System OFF, this
+ * current would keep draining the battery the whole time the half is
+ * "asleep". On sleep we therefore disable the interrupts and set the
+ * pins to Hi-Z (disconnected, no pull); on wake we restore them.
+ * ========================================================= */
+
+static void bbtrackball_set_low_power(bool low_power) {
+    for (size_t i = 0; i < ARRAY_SIZE(dir_inputs); i++) {
+        DirInput *d = &dir_inputs[i];
+
+        if (low_power) {
+            gpio_pin_interrupt_configure(d->gpio_dev, d->pin, GPIO_INT_DISABLE);
+            gpio_pin_configure(d->gpio_dev, d->pin, GPIO_DISCONNECTED);
+        } else {
+            gpio_pin_configure(d->gpio_dev, d->pin, GPIO_INPUT | GPIO_PULL_UP);
+            d->last_state = gpio_pin_get(d->gpio_dev, d->pin);
+            d->last_time = k_uptime_get_32();
+            gpio_pin_interrupt_configure(d->gpio_dev, d->pin, GPIO_INT_EDGE_BOTH);
+        }
+    }
+}
+
+static int bbtrackball_activity_listener(const zmk_event_t *eh) {
+    const struct zmk_activity_state_changed *ev = as_zmk_activity_state_changed(eh);
+    if (!ev)
+        return ZMK_EV_EVENT_BUBBLE;
+
+    if (ev->state == ZMK_ACTIVITY_SLEEP) {
+        bbtrackball_set_low_power(true);
+    } else if (ev->state == ZMK_ACTIVITY_ACTIVE) {
+        bbtrackball_set_low_power(false);
+    }
+
+    return ZMK_EV_EVENT_BUBBLE;
+}
+
+ZMK_LISTENER(bbtrackball_activity, bbtrackball_activity_listener);
+ZMK_SUBSCRIPTION(bbtrackball_activity, zmk_activity_state_changed);
 
 /* =========================================================
  * Init

@@ -19,8 +19,10 @@
 
 #include <zephyr/input/input.h>
 #include <zephyr/sys/byteorder.h>
+#include <zmk/activity.h>
 #include <zmk/events/hid_indicators_changed.h>
 #include <zmk/events/position_state_changed.h>
+#include <zmk/events/activity_state_changed.h>
 #include <zephyr/dt-bindings/input/input-event-codes.h>
 #include <zmk/hid.h>
 
@@ -411,6 +413,48 @@ static void trackpoint_enable_irq_work_cb(struct k_work *work) {
 
     LOG_INF("TrackPoint IRQ enabled (delayed)");
 }
+/* ========= ★ 全局设备指针（供 activity 监听使用） ========= */
+static const struct device *tp_dev_global;
+
+/* =========================================================
+ * Low-power handling (deep sleep)
+ *
+ * On sleep, disable the motion interrupt and set the motion pin to
+ * Hi-Z so no current flows through its internal pull-up while the SoC
+ * is in System OFF. Restore the input + interrupt on wake.
+ * ========================================================= */
+static void trackpoint_set_low_power(bool low_power) {
+    if (!tp_dev_global)
+        return;
+
+    const struct trackpoint_config *cfg = tp_dev_global->config;
+
+    if (low_power) {
+        gpio_pin_interrupt_configure_dt(&cfg->motion_gpio, GPIO_INT_DISABLE);
+        gpio_pin_configure(cfg->motion_gpio.port, cfg->motion_gpio.pin, GPIO_DISCONNECTED);
+    } else {
+        gpio_pin_configure_dt(&cfg->motion_gpio, GPIO_INPUT);
+        gpio_pin_interrupt_configure_dt(&cfg->motion_gpio, GPIO_INT_EDGE_TO_ACTIVE);
+    }
+}
+
+static int trackpoint_activity_listener(const zmk_event_t *eh) {
+    const struct zmk_activity_state_changed *ev = as_zmk_activity_state_changed(eh);
+    if (!ev)
+        return ZMK_EV_EVENT_BUBBLE;
+
+    if (ev->state == ZMK_ACTIVITY_SLEEP) {
+        trackpoint_set_low_power(true);
+    } else if (ev->state == ZMK_ACTIVITY_ACTIVE) {
+        trackpoint_set_low_power(false);
+    }
+
+    return ZMK_EV_EVENT_BUBBLE;
+}
+
+ZMK_LISTENER(trackpoint_activity, trackpoint_activity_listener);
+ZMK_SUBSCRIPTION(trackpoint_activity, zmk_activity_state_changed);
+
 /* ========= 初始化函数 ========= */
 static int trackpoint_init(const struct device *dev) {
     const struct trackpoint_config *cfg = dev->config;
@@ -423,6 +467,7 @@ static int trackpoint_init(const struct device *dev) {
     k_mutex_init(&trackpoint_i2c_mutex);
 
     data->dev = dev;
+    tp_dev_global = dev;
     data->scroll_residue_x = 0;
     data->scroll_residue_y = 0;
     data->arrow_residue_x = 0;

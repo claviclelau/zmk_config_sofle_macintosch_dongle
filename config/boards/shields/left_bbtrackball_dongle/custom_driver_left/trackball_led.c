@@ -12,7 +12,9 @@
 #include <zephyr/logging/log.h>
 
 #include <zmk/event_manager.h>
+#include <zmk/activity.h>
 #include <zmk/events/hid_indicators_changed.h>
+#include <zmk/events/activity_state_changed.h>
 #include <zmk/hid_indicators.h>
 #include <zmk/rgb_underglow.h>
 
@@ -260,6 +262,34 @@ static int hid_listener(const zmk_event_t *eh) {
 
     return ZMK_EV_EVENT_BUBBLE;
 }
+
+/* ============================================================================================
+ * Activity listener: stop polling and force LED off while asleep
+ * ============================================================================================ */
+static int trackball_led_activity_cb(const zmk_event_t *eh) {
+    const struct zmk_activity_state_changed *ev = as_zmk_activity_state_changed(eh);
+    if (!ev)
+        return ZMK_EV_EVENT_BUBBLE;
+
+    if (ev->state == ZMK_ACTIVITY_SLEEP) {
+        k_work_cancel_delayable(&poll_work);
+        k_work_cancel_delayable(&anim_work);
+        k_work_cancel_delayable(&off_work);
+        k_work_cancel_delayable(&fade_in_work);
+        k_work_cancel_delayable(&fade_out_work);
+        fade_in_active = false;
+        fade_out_active = false;
+        current_brt = 0;
+        set_led_brightness(0);
+    } else if (ev->state == ZMK_ACTIVITY_ACTIVE) {
+        k_work_reschedule(&poll_work, K_NO_WAIT);
+    }
+
+    return ZMK_EV_EVENT_BUBBLE;
+}
+
+ZMK_LISTENER(trackball_led_activity, trackball_led_activity_cb);
+ZMK_SUBSCRIPTION(trackball_led_activity, zmk_activity_state_changed);
 
 /* ============================================================================================
  * 初始化
