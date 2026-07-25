@@ -16,5 +16,35 @@ config BBtrackball_max_brightness
     range 0 100
     help
       The brightness when you move the BB trackball
-      
+
+config BBtrackball_IDLE_POWER_DOWN_MS
+    int "Milliseconds without trackball movement before its GPIOs are powered down"
+    default 60000
+    help
+      The four trackball direction lines are held by internal pull-ups. Every
+      line the encoder holds low sinks ~230uA continuously, which is far more
+      than the rest of the half draws while idle. After this many milliseconds
+      without trackball movement the lines are set to Hi-Z and their interrupts
+      are disabled. They are restored on the next key press on this half (or
+      when the half wakes up). Set to 0 to disable the idle power down.
+
+config BBtrackball_EDGE_DEBOUNCE_US
+    int "Minimum microseconds between two accepted edges on the same trackball line"
+    default 300
+    help
+      Edges closer together than this are treated as contact chatter/noise and
+      ignored. Keep well below the fastest real pulse rate of the encoder.
+
+config BBtrackball_MOVE_START_THRESHOLD
+    int "Accumulated pixels required before a new trackball movement is reported"
+    default 6
+    help
+      A single stray pulse is not a movement. Until this much movement has
+      accumulated within BBtrackball_MOVE_BURST_WINDOW_MS no input event is
+      emitted, so noise cannot keep resetting ZMK's idle/sleep timer.
+
+config BBtrackball_MOVE_BURST_WINDOW_MS
+    int "Milliseconds a partial trackball movement is kept before it is discarded"
+    default 400
+
 endmenu

@@ -58,6 +58,12 @@ static struct k_work_q bbtrackball_work_q;
 
 #define MOVE_IDLE_TIMEOUT 30
 
+/* Noise rejection / idle power tuning (see Kconfig.shield) */
+#define EDGE_DEBOUNCE_US CONFIG_BBtrackball_EDGE_DEBOUNCE_US
+#define MOVE_START_THRESHOLD CONFIG_BBtrackball_MOVE_START_THRESHOLD
+#define MOVE_BURST_WINDOW_MS CONFIG_BBtrackball_MOVE_BURST_WINDOW_MS
+#define IDLE_POWER_DOWN_MS CONFIG_BBtrackball_IDLE_POWER_DOWN_MS
+
 #define ARROW_TRIGGER_THRESHOLD 4
 #define ARROW_REPEAT_MS 35
 
@@ -82,6 +88,20 @@ static int scroll_acc_y = 0;
 static uint32_t last_move_time = 0;
 static uint32_t last_arrow_trigger = 0;
 
+/* Movement pending validation: kept out of the input subsystem until it is
+ * confirmed to be a real movement rather than a single noise pulse. */
+static int pend_dx = 0;
+static int pend_dy = 0;
+static uint32_t pend_time = 0;
+static bool reporting_active = false;
+
+/* True while the direction lines are parked in Hi-Z to save power. */
+static bool low_power_active = false;
+static struct k_work_delayable idle_power_down_work;
+
+static void bbtrackball_arm_idle_power_down(void);
+static void bbtrackball_wake(void);
+
 /* =========================================================
  * HID indicators
  * ========================================================= */
@@ -99,14 +119,15 @@ typedef struct {
     int pin;
     int last_state;
     uint32_t last_time;
+    uint32_t last_edge_cyc;
     int sign;
 } DirInput;
 
 static DirInput dir_inputs[] = {
-    {DEVICE_DT_GET(GPIO0_DEV), LEFT_GPIO_PIN, 1, 0, -1},
-    {DEVICE_DT_GET(GPIO0_DEV), RIGHT_GPIO_PIN, 1, 0, +1},
-    {DEVICE_DT_GET(GPIO0_DEV), UP_GPIO_PIN, 1, 0, -1},
-    {DEVICE_DT_GET(GPIO1_DEV), DOWN_GPIO_PIN, 1, 0, +1},
+    {DEVICE_DT_GET(GPIO0_DEV), LEFT_GPIO_PIN, 1, 0, 0, -1},
+    {DEVICE_DT_GET(GPIO0_DEV), RIGHT_GPIO_PIN, 1, 0, 0, +1},
+    {DEVICE_DT_GET(GPIO0_DEV), UP_GPIO_PIN, 1, 0, 0, -1},
+    {DEVICE_DT_GET(GPIO1_DEV), DOWN_GPIO_PIN, 1, 0, 0, +1},
 };
 
 /* ========================================================= */
@@ -160,6 +181,11 @@ static int space_listener_cb(const zmk_event_t *eh) {
     if (!ev)
         return 0;
 
+    /* Typing is the only signal we get once the trackball lines are parked. */
+    if (ev->state) {
+        bbtrackball_wake();
+    }
+
     if (ev->position == 32) {
         arrow_key_pressed = ev->state;
     }
@@ -193,9 +219,20 @@ static void dir_edge_cb(const struct device *dev, struct gpio_callback *cb, uint
 
         if ((dev == d->gpio_dev) && (pins & BIT(d->pin))) {
 
+            uint32_t now_cyc = k_cycle_get_32();
+
+            /* Contact chatter / electrical noise: ignore edges that follow the
+             * previous accepted edge on this line too closely. last_state is
+             * left untouched so a genuine later transition is still seen. */
+            if (k_cyc_to_us_floor32(now_cyc - d->last_edge_cyc) < EDGE_DEBOUNCE_US) {
+                continue;
+            }
+
             int val = gpio_pin_get(dev, d->pin);
 
             if (val != d->last_state) {
+
+                d->last_edge_cyc = now_cyc;
 
                 uint32_t now = k_uptime_get_32();
                 uint32_t delta = now - d->last_time;
@@ -246,8 +283,39 @@ static void bbtrackball_work_handler(struct k_work *work) {
         return;
     }
 
+    /* A burst of movement ends once the ball has been still for a while. */
+    if (reporting_active && (now - last_move_time > MOVE_BURST_WINDOW_MS)) {
+        reporting_active = false;
+    }
+
+    /* Require a real movement before anything reaches the input subsystem.
+     * Any input event resets ZMK's idle/sleep timer, so a single stray pulse
+     * from a nudged or noisy encoder would otherwise keep this half awake. */
+    if (!reporting_active) {
+        if (now - pend_time > MOVE_BURST_WINDOW_MS) {
+            pend_dx = 0;
+            pend_dy = 0;
+        }
+
+        pend_dx += dx;
+        pend_dy += dy;
+        pend_time = now;
+
+        if (abs(pend_dx) + abs(pend_dy) < MOVE_START_THRESHOLD) {
+            return;
+        }
+
+        dx = pend_dx;
+        dy = pend_dy;
+        pend_dx = 0;
+        pend_dy = 0;
+        reporting_active = true;
+    }
+
     last_move_time = now;
     moved = true;
+
+    bbtrackball_arm_idle_power_down();
 
     bool capslock = current_indicators & HID_INDICATORS_CAPS_LOCK;
 
@@ -305,18 +373,27 @@ static void bbtrackball_work_handler(struct k_work *work) {
 }
 
 /* =========================================================
- * Low-power handling (deep sleep)
+ * Low-power handling (idle + deep sleep)
  *
  * The four direction GPIOs are normally held with internal pull-ups.
  * If the trackball encoder holds any of these lines low, the pull-up
- * sources a continuous current (~250uA per line on the nRF52). Because
- * pin configuration is retained when the SoC enters System OFF, this
- * current would keep draining the battery the whole time the half is
- * "asleep". On sleep we therefore disable the interrupts and set the
- * pins to Hi-Z (disconnected, no pull); on wake we restore them.
+ * sources a continuous current (~230uA per line on the nRF52). That is
+ * an order of magnitude more than the rest of this half draws while it
+ * is idle, and because pin configuration is retained when the SoC enters
+ * System OFF it would also keep draining the battery for the whole time
+ * the half is "asleep".
+ *
+ * The lines are therefore set to Hi-Z (disconnected, no pull) with their
+ * interrupts disabled both after IDLE_POWER_DOWN_MS without any trackball
+ * movement and when the half goes to sleep. They are restored on the next
+ * key press on this half and when the half becomes active again.
  * ========================================================= */
 
 static void bbtrackball_set_low_power(bool low_power) {
+    if (low_power == low_power_active) {
+        return;
+    }
+
     for (size_t i = 0; i < ARRAY_SIZE(dir_inputs); i++) {
         DirInput *d = &dir_inputs[i];
 
@@ -327,9 +404,51 @@ static void bbtrackball_set_low_power(bool low_power) {
             gpio_pin_configure(d->gpio_dev, d->pin, GPIO_INPUT | GPIO_PULL_UP);
             d->last_state = gpio_pin_get(d->gpio_dev, d->pin);
             d->last_time = k_uptime_get_32();
+            d->last_edge_cyc = k_cycle_get_32();
             gpio_pin_interrupt_configure(d->gpio_dev, d->pin, GPIO_INT_EDGE_BOTH);
         }
     }
+
+    low_power_active = low_power;
+
+    /* Drop anything that was accumulated while the lines were reconfigured. */
+    dx_acc = 0;
+    dy_acc = 0;
+    pend_dx = 0;
+    pend_dy = 0;
+    reporting_active = false;
+
+    LOG_DBG("BBtrackball lines %s", low_power ? "powered down" : "restored");
+}
+
+static void bbtrackball_arm_idle_power_down(void) {
+    if (IDLE_POWER_DOWN_MS <= 0) {
+        return;
+    }
+
+    k_work_reschedule(&idle_power_down_work, K_MSEC(IDLE_POWER_DOWN_MS));
+}
+
+static void idle_power_down_handler(struct k_work *work) {
+    ARG_UNUSED(work);
+
+    if (trackball_is_active()) {
+        bbtrackball_arm_idle_power_down();
+        return;
+    }
+
+    bbtrackball_set_low_power(true);
+}
+
+/* Restore the lines after they were parked; the trackball itself cannot
+ * signal us while it is disconnected, so any key press on this half brings
+ * it back. */
+static void bbtrackball_wake(void) {
+    if (low_power_active) {
+        bbtrackball_set_low_power(false);
+    }
+
+    bbtrackball_arm_idle_power_down();
 }
 
 static int bbtrackball_activity_listener(const zmk_event_t *eh) {
@@ -338,9 +457,10 @@ static int bbtrackball_activity_listener(const zmk_event_t *eh) {
         return ZMK_EV_EVENT_BUBBLE;
 
     if (ev->state == ZMK_ACTIVITY_SLEEP) {
+        k_work_cancel_delayable(&idle_power_down_work);
         bbtrackball_set_low_power(true);
     } else if (ev->state == ZMK_ACTIVITY_ACTIVE) {
-        bbtrackball_set_low_power(false);
+        bbtrackball_wake();
     }
 
     return ZMK_EV_EVENT_BUBBLE;
@@ -367,6 +487,7 @@ static int bbtrackball_init(const struct device *dev) {
                        NULL);
 
     k_work_init(&data->work, bbtrackball_work_handler);
+    k_work_init_delayable(&idle_power_down_work, idle_power_down_handler);
 
     for (size_t i = 0; i < ARRAY_SIZE(dir_inputs); i++) {
 
@@ -376,6 +497,7 @@ static int bbtrackball_init(const struct device *dev) {
 
         d->last_state = gpio_pin_get(d->gpio_dev, d->pin);
         d->last_time = k_uptime_get_32();
+        d->last_edge_cyc = k_cycle_get_32();
 
         data->gpio_cbs[i].parent = data;
 
@@ -384,6 +506,8 @@ static int bbtrackball_init(const struct device *dev) {
 
         gpio_pin_interrupt_configure(d->gpio_dev, d->pin, GPIO_INT_EDGE_BOTH);
     }
+
+    bbtrackball_arm_idle_power_down();
 
     return 0;
 }
