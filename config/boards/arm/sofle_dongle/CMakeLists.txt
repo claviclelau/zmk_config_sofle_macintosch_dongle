@@ -1,3 +1,9 @@
+if(CONFIG_BOARD_SOFLE_DONGLE)
+  zephyr_library()
+  zephyr_library_sources(custom_driver/input_processor_trackpad_mode.c)
+  zephyr_library_include_directories(${CMAKE_SOURCE_DIR}/include)
+endif()
+
 if(CONFIG_BOARD_SOFLE_DONGLE_LEFT)
 zephyr_library()
 zephyr_library_sources(custom_driver/keyboard_backlight.c)
@@ -14,4 +20,3 @@ if(CONFIG_BOARD_SOFLE_DONGLE_RIGHT)
   zephyr_library_include_directories(../../../include)
   zephyr_library_include_directories(${CMAKE_SOURCE_DIR}/include)
 endif()
-

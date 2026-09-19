@@ -26,6 +26,19 @@
             #input-processor-cells = <2>;
         };
 
+        trackpad_mode: trackpad_mode {
+            compatible = "zmk,input-processor-trackpad-mode";
+            #input-processor-cells = <0>;
+        };
+
+        trackpad_scroll_scaler: trackpad_scroll_scaler {
+            compatible = "zmk,input-processor-scaler";
+            #input-processor-cells = <2>;
+            type = <INPUT_EV_REL>;
+            codes = <INPUT_REL_WHEEL INPUT_REL_HWHEEL>;
+            track-remainders;
+        };
+
         ip_behaviors0: ip_behaviors0 {
             compatible = "zmk,input-processor-behaviors";
             #input-processor-cells = <0>;

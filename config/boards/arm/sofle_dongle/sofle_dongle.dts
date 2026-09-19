@@ -119,6 +119,8 @@
     status = "okay";
     input-processors =
         <&zip_temp_layer 3 600>,
+        <&trackpad_mode>,
+        <&trackpad_scroll_scaler 1 30>,
         <&ip_behaviors0>,
         <&ip_behaviors1>,
         <&ip_behaviors2>,

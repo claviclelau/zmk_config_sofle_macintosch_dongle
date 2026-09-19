@@ -39,27 +39,6 @@ config A320_EXPONENTIAL
       Enable exponential acceleration for A320 movement,
       similar to trackball behavior.
 
-config A320_TOGGLE_KEY_POSITION
-    int "Key position to toggle mouse/scroll mode"
-    default 62
-    help
-      ZMK position code of the key used to toggle between mouse and scroll mode.
-
-config A320_START_IN_SCROLL_MODE
-    bool "Start in scroll mode by default"
-    default y
-    help
-      If yes (y), the default state is scroll mode, and holding the toggle key switches to mouse mode.
-      If no (n), the default state is mouse mode, and holding the toggle key switches to scroll mode.
-
-config A320_SCROLL_X_DIR
-    int "Scroll X direction multiplier (1 for normal, -1 for inverted)"
-    default 1
-
-config A320_SCROLL_Y_DIR
-    int "Scroll Y direction multiplier (1 for normal, -1 for inverted)"
-    default 1
-
 config A320_SCROLL_DEADZONE
     int "Scroll deadzone"
     default 1

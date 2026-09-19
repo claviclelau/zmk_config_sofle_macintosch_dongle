@@ -12,16 +12,13 @@
 #include <stdlib.h>
 #include <zephyr/drivers/gpio.h>
 #include <zephyr/drivers/i2c.h>
-#include <math.h>
 #include <zmk/event_manager.h>
 #include <zmk/events/position_state_changed.h>
 
 #include <zephyr/input/input.h>
 #include <zephyr/logging/log.h>
 #include <zephyr/sys/byteorder.h>
-#include <zmk/events/hid_indicators_changed.h>
 #include <zephyr/dt-bindings/input/input-event-codes.h>
-#include <zmk/hid.h>
 
 #include "trackpad_led.h"
 #include "a320.h"
@@ -39,12 +36,8 @@ K_THREAD_STACK_DEFINE(a320_workq_stack, A320_WORKQ_STACK_SIZE);
 static struct k_work_q a320_workq;
 
 /* ========================================================================= */
-/* 鼠标与滚轮可调参数 (已映射至 Kconfig，用户可在 .conf 中配置)                 */
+/* Mouse and arrow-key tuning parameters configured through Kconfig. */
 /* ========================================================================= */
-
-// --- 滚轮方向配置 ---
-#define SCROLL_X_DIR (-CONFIG_A320_SCROLL_X_DIR)
-#define SCROLL_Y_DIR CONFIG_A320_SCROLL_Y_DIR
 
 // --- 滚轮灵敏度与粒度配置 ---
 #define SCROLL_INPUT_MAX CONFIG_A320_SCROLL_INPUT_MAX
@@ -83,44 +76,20 @@ static struct k_work_q a320_workq;
 static uint32_t last_activity_time = 0;
 #define A320_WDT_TIMEOUT 200
 /* ========= 全局状态 ========= */
-static bool scroll_key_pressed = false;
 static bool arrow_key_pressed = false;
 static bool slow_key_pressed = false;
 static bool last_arrow_key_pressed = false;
 uint32_t last_packet_time = 0;
 static bool touched = false;
 
-/* ==== HID indicators ==== */
-static zmk_hid_indicators_t current_indicators;
-#define HID_INDICATORS_CAPS_LOCK (1 << 1)
-/* =========================
- *   HID indicator listener
- * ========================= */
-static int hid_indicators_listener(const zmk_event_t *eh) {
-    const struct zmk_hid_indicators_changed *ev = as_zmk_hid_indicators_changed(eh);
-    if (ev) {
-        current_indicators = ev->indicators;
-    }
-    return ZMK_EV_EVENT_BUBBLE;
-}
-
-ZMK_LISTENER(a320_hid_listener, hid_indicators_listener);
-ZMK_SUBSCRIPTION(a320_hid_listener, zmk_hid_indicators_changed);
-
-/* ========= Space + Slow 按键监听 ========= */
+/* ========= Arrow + Slow key listener ========= */
 static int special_key_listener_cb(const zmk_event_t *eh) {
     const struct zmk_position_state_changed *ev = as_zmk_position_state_changed(eh);
     if (!ev)
         return 0;
-    if (ev->position == 35) {
+    if (ev->position == 41) {
         arrow_key_pressed = ev->state;
-        LOG_INF("Arrow position=49 %s", arrow_key_pressed ? "PRESSED" : "RELEASED");
-    }
-
-    // Scroll key (Space)
-    if (ev->position == 62) {
-        scroll_key_pressed = ev->state;
-        LOG_INF("space position=49 %s", scroll_key_pressed ? "PRESSED" : "RELEASED");
+        LOG_INF("Shift arrow mode %s", arrow_key_pressed ? "ENABLED" : "DISABLED");
     }
 
     // ★ NEW: Slow key
@@ -150,10 +119,6 @@ struct a320_data {
     struct gpio_callback motion_cb_data;
     struct k_work_delayable enable_irq_work; // ⭐ 新增
     uint32_t last_packet_time;
-    uint32_t last_scroll_time;
-    bool last_scroll_mode;
-    float scroll_residue_x;
-    float scroll_residue_y;
     int16_t arrow_residue_x;
     int16_t arrow_residue_y;
 };
@@ -220,40 +185,6 @@ static void a320_detect_variant(const struct device *dev) {
         (found_addr == A320_I2C_ADDR_3B) ? a320_read_packet_3b : a320_read_packet_37;
 }
 
-/* Same speed scaling and fractional accumulation as the Q20 CM5 driver. */
-static inline void process_cm5_scroll(const struct device *dev, struct a320_data *data,
-                                      int16_t dx, int16_t dy, uint32_t now) {
-    if (now - data->last_scroll_time > 60) {
-        data->scroll_residue_x = 0.0f;
-        data->scroll_residue_y = 0.0f;
-    }
-    data->last_scroll_time = now;
-
-    float speed = sqrtf((float)dx * dx + (float)dy * dy);
-    float scale;
-    if (speed > 80.0f)
-        scale = 0.05f;
-    else if (speed > 40.0f)
-        scale = 0.04f;
-    else if (speed > 20.0f)
-        scale = 0.03f;
-    else if (speed > 5.0f)
-        scale = 0.02f;
-    else
-        scale = 0.015f;
-
-    data->scroll_residue_x += dx * scale;
-    data->scroll_residue_y += dy * scale;
-    int16_t out_x = (int16_t)data->scroll_residue_x;
-    int16_t out_y = (int16_t)data->scroll_residue_y;
-    data->scroll_residue_x -= out_x;
-    data->scroll_residue_y -= out_y;
-    if (out_x || out_y) {
-        input_report_rel(dev, INPUT_REL_HWHEEL, -out_x, false, K_FOREVER);
-        input_report_rel(dev, INPUT_REL_WHEEL, -out_y, true, K_FOREVER);
-    }
-}
-
 static inline void process_arrow_axis(const struct device *dev, int16_t delta, int16_t *residue,
                                       uint16_t key_neg, uint16_t key_pos) {
 
@@ -303,10 +234,6 @@ static void a320_work_cb(struct k_work *work) {
     if (now - last_activity_time > A320_WDT_TIMEOUT) {
         LOG_WRN("A320 watchdog recovery");
 
-        data->scroll_residue_x = 0.0f;
-        data->scroll_residue_y = 0.0f;
-        data->last_scroll_time = 0;
-        data->last_scroll_mode = false;
         data->arrow_residue_x = 0;
         data->arrow_residue_y = 0;
 
@@ -359,16 +286,8 @@ static void a320_work_cb(struct k_work *work) {
     int16_t dx = total_dx;
     int16_t dy = total_dy;
 
-    /* ========= scroll / arrow mode 切换检测 ========= */
+    /* ========= Arrow mode detection ========= */
     bool just_enter_arrow = arrow_key_pressed && !last_arrow_key_pressed;
-    bool capslock = current_indicators & HID_INDICATORS_CAPS_LOCK;
-    bool scroll_mode = scroll_key_pressed || capslock;
-
-    if (scroll_mode && !data->last_scroll_mode) {
-        data->scroll_residue_x = 0.0f;
-        data->scroll_residue_y = 0.0f;
-        data->last_scroll_time = 0;
-    }
 
     if (arrow_key_pressed) {
 
@@ -392,13 +311,7 @@ static void a320_work_cb(struct k_work *work) {
         process_arrow_axis(dev, dx, &data->arrow_residue_x, INPUT_BTN_1, INPUT_BTN_0);
 
         process_arrow_axis(dev, dy, &data->arrow_residue_y, INPUT_BTN_3, INPUT_BTN_2);
-    } else if (scroll_mode) {
-        /* Keep this board's original X/Y axes and scroll directions. */
-        int16_t scroll_x = dx * SCROLL_X_DIR;
-        int16_t scroll_y = dy * SCROLL_Y_DIR;
-        process_cm5_scroll(dev, data, scroll_x, scroll_y, now);
-    } else if (!capslock) {
-
+    } else {
         uint8_t a320_led_brt = indicator_tp_get_last_valid_brightness();
         float a320_factor = 0.4f + 0.01f * a320_led_brt;
 
@@ -409,11 +322,8 @@ static void a320_work_cb(struct k_work *work) {
 
         input_report_rel(dev, INPUT_REL_X, (int)fx, false, K_NO_WAIT);
         input_report_rel(dev, INPUT_REL_Y, (int)fy, true, K_NO_WAIT);
-    } else {
-        touched = false;
     }
 
-    data->last_scroll_mode = scroll_mode && !arrow_key_pressed;
     last_arrow_key_pressed = arrow_key_pressed;
     touched = false;
     data->last_packet_time = now;
