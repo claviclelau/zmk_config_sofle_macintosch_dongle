@@ -320,8 +320,8 @@ static void a320_work_cb(struct k_work *work) {
         float fx = dx * 3 / 4 * a320_factor * slow_mult;
         float fy = dy * 3 / 4 * a320_factor * slow_mult;
 
-        input_report_rel(dev, INPUT_REL_X, (int)fx, false, K_NO_WAIT);
-        input_report_rel(dev, INPUT_REL_Y, (int)fy, true, K_NO_WAIT);
+        input_report_rel(dev, INPUT_REL_HWHEEL, (int)fx, false, K_NO_WAIT);
+        input_report_rel(dev, INPUT_REL_WHEEL, -(int)fy, true, K_NO_WAIT);
     }
 
     last_arrow_key_pressed = arrow_key_pressed;

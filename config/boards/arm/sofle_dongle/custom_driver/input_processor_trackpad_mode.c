@@ -27,14 +27,14 @@ static bool pointer_mode_active(void) {
 static int trackpad_mode_handle_event(const struct device *dev, struct input_event *event,
                                       uint32_t param1, uint32_t param2,
                                       struct zmk_input_processor_state *state) {
-    if (event->type != INPUT_EV_REL || pointer_mode_active()) {
+    if (event->type != INPUT_EV_REL || !pointer_mode_active()) {
         return ZMK_INPUT_PROC_CONTINUE;
     }
 
-    if (event->code == INPUT_REL_X) {
-        event->code = INPUT_REL_HWHEEL;
-    } else if (event->code == INPUT_REL_Y) {
-        event->code = INPUT_REL_WHEEL;
+    if (event->code == INPUT_REL_HWHEEL) {
+        event->code = INPUT_REL_X;
+    } else if (event->code == INPUT_REL_WHEEL) {
+        event->code = INPUT_REL_Y;
         event->value = -event->value;
     }
 

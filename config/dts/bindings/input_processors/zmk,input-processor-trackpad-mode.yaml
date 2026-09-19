@@ -1,7 +1,7 @@
 # Copyright (c) 2026 The ZMK Contributors
 # SPDX-License-Identifier: MIT
 
-description: Convert trackpad pointer events to wheel events unless pointer mode is active
+description: Convert trackpad wheel events to pointer events while pointer mode is active
 
 compatible: "zmk,input-processor-trackpad-mode"
 
