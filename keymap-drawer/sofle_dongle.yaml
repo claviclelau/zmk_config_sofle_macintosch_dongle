@@ -1,145 +1,6 @@
 layout: {zmk_keyboard: sofle_dongle}
 layers:
-  QWERTY: ['&bootloader', ESC, '1', '2', '3', '4', '5', MUTE, MUTE, '6', '7', '8', '9', '0', BSPC, TAB, Q, W, E, R, T, Y, U, I, O, P, \, CAPS, A, S, D, F, G, '&mkp
-      LCLK', '&mkp LCLK', H, J, K, L, ;, ENTER, LSHFT, Z, X, C, V, B, PG DN, PG UP, '&msc SCRL_DOWN', '&msc SCRL_UP', N, M, ',', ., /, RSHIFT, LCTRL, LGUI, LALT,
-    SPACE, LOWER, LOWER, SPACE, '-', '=', '`']
-  LOWER:
-  - '&bootloader'
-  - ESC
-  - F1
-  - F2
-  - F3
-  - F4
-  - F5
-  - BT CLR
-  - MUTE
-  - F6
-  - F7
-  - F8
-  - F9
-  - F10
-  - DEL
-  - TAB
-  - {t: ▽, type: trans}
-  - UP
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - OUT TOG
-  - F11
-  - F12
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - HOME
-  - \
-  - CAPS
-  - LEFT
-  - DOWN
-  - RIGHT
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - '&mkp RCLK'
-  - '&mkp RCLK'
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - ''''
-  - ENTER
-  - LSHFT
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - RGB TOG
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - '&bl BL_DEC'
-  - '&bl BL_INC'
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - '['
-  - ']'
-  - _
-  - +
-  - '&bootloader'
-  - LGUI
-  - LALT
-  - SPACE
-  - {t: LOWER, type: held}
-  - LOWER
-  - SPACE
-  - {t: ▽, type: trans}
-  - .
-  - '&bootloader'
-  RAISE:
-  - '&bootloader'
-  - ESC
-  - F1
-  - F2
-  - F3
-  - F4
-  - F5
-  - BT CLR
-  - MUTE
-  - F6
-  - F7
-  - F8
-  - F9
-  - F10
-  - BSPC
-  - TAB
-  - {t: ▽, type: trans}
-  - UP
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - OUT TOG
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - CAPS
-  - LEFT
-  - DOWN
-  - RIGHT
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - '&mkp RCLK'
-  - ''
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - LSHFT
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - RGB TOG
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - ''
-  - ''
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - ''
-  - LGUI
-  - LALT
-  - SPACE
-  - LOWER
-  - LOWER
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  MOUSE:
+  QWERTY:
   - '&bootloader'
   - ESC
   - '1'
@@ -147,7 +8,7 @@ layers:
   - '3'
   - '4'
   - '5'
-  - BT CLR
+  - MUTE
   - MUTE
   - '6'
   - '7'
@@ -162,12 +23,12 @@ layers:
   - R
   - T
   - Y
-  - {t: U, h: '&mkp MB3'}
+  - U
   - I
   - O
   - P
-  - \
-  - CAPS
+  - DELETE
+  - LEFT CONTROL
   - A
   - S
   - D
@@ -176,36 +37,309 @@ layers:
   - '&mkp LCLK'
   - '&mkp LCLK'
   - H
-  - {t: J, h: '&mkp MB1'}
+  - J
   - K
   - L
   - ;
-  - ENTER
+  - {t: '''', h: FN}
   - LSHFT
   - Z
   - X
   - C
   - V
   - B
-  - '&msc SCRL_DOWN'
-  - '&msc SCRL_UP'
-  - ''
-  - ''
+  - PG DN
+  - PG UP
+  - {t: '[', h: '{'}
+  - {t: ']', h: '}'}
   - N
-  - {t: M, h: '&mkp MB2'}
+  - M
   - ','
   - .
   - /
-  - RSHIFT
-  - LCTRL
-  - LGUI
-  - LALT
+  - \
+  - LEFT WIN
+  - FN
+  - ENTER
+  - LOWER
+  - '&mkp LCLK'
+  - '&mkp RCLK'
+  - RAISE
   - SPACE
-  - '&mkp MB1'
-  - '&mkp MB1'
-  - '&tdRMCLK'
+  - DEVICE
+  - RIGHT ALT
+  LOWER:
+  - '&bootloader'
+  - '~'
+  - F1
+  - F2
+  - F3
+  - F4
+  - F5
+  - BT CLR
+  - MUTE
+  - F6
+  - F7
+  - F8
+  - F9
+  - F10
+  - F11
+  - '`'
+  - '{'
+  - '}'
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - HOME
+  - UP
+  - END
+  - _
+  - +
+  - F12
+  - LEFT CONTROL
+  - '['
+  - ']'
+  - '&mod_with_latency LEFT_ALT LEFT'
+  - '&mod_with_latency LEFT_ALT RIGHT'
+  - {t: ▽, type: trans}
+  - '&mkp RCLK'
+  - '&mkp RCLK'
+  - LEFT
+  - DOWN
+  - RIGHT
   - '-'
   - '='
+  - {t: ▽, type: trans}
+  - LSHFT
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - '&bl BL_DEC'
+  - '&bl BL_INC'
+  - PAGE UP
+  - PAGE DOWN
+  - '&mod_with_latency RIGHT_ALT LEFT'
+  - '&mod_with_latency RIGHT_ALT RIGHT'
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - LEFT GUI
+  - FN
+  - ENTER
+  - {t: LOWER, type: held}
+  - '&mkp LCLK'
+  - '&mkp RCLK'
+  - RAISE
+  - SPACE
+  - DEVICE
+  - RIGHT ALT
+  RAISE:
+  - '&bootloader'
   - '`'
-  RESERVE: ['&bootloader', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '',
-    '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '']
+  - F1
+  - F2
+  - F3
+  - F4
+  - F5
+  - BT CLR
+  - MUTE
+  - F6
+  - F7
+  - F8
+  - F9
+  - F10
+  - F11
+  - TAB
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - '&mod_with_latency LEFT_ALT LEFT'
+  - '&mod_with_latency LEFT_ALT RIGHT'
+  - Gui+UP
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - F12
+  - LEFT CONTROL
+  - ''
+  - ''
+  - Gui+LEFT
+  - Gui+RIGHT
+  - Gui+DOWN
+  - '&mkp RCLK'
+  - ''
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - LSHFT
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - ''
+  - ''
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - LEFT GUI
+  - FN
+  - ENTER
+  - LOWER
+  - '&mkp LCLK'
+  - '&mkp RCLK'
+  - {t: RAISE, type: held}
+  - SPACE
+  - DEVICE
+  - RIGHT ALT
+  MOUSE: ['&bootloader', ESC, '1', '2', '3', '4', '5', BT CLR, MUTE, '6', '7', '8', '9', '0', BSPC, TAB, Q, W, E, R, T, Y, U, I, O, P, DEL, LEFT CONTROL, A, S, D,
+    F, G, '&mkp_ml LCLK', '&mkp_ml LCLK', H, J, K, L, ;, '''', LEFT SHIFT, Z, X, C, V, B, '&msc_ml SCRL_DOWN', '&msc_ml SCRL_UP', '&mkp_ml LCLK', '&mkp_ml RCLK',
+    N, M, ',', ., /, \, LEFT GUI, '', ENTER, LOWER, '&mkp LCLK', '&mkp RCLK', RAISE, SPACE, '', RIGHT ALT]
+  FN:
+  - '&bootloader'
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - '&mod_with_latency LEFT_ALT SPACE'
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - '&mod_alt_latency LEFT_CONTROL S'
+  - ''
+  - ''
+  - '&mod_with_latency LALT G'
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - {type: held}
+  - ''
+  - ''
+  - ''
+  - Gui+C
+  - '&mod_alt_latency LEFT_CONTROL V'
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  DEVICE:
+  - '&bootloader'
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - RGB TOG
+  - OUT TOG
+  - ''
+  - OUT USB
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - '&bl BL_TOG'
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - OUT BLE
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - DEVICE
+  - ''
+  - ''
+  - {type: held}
+  - ''
