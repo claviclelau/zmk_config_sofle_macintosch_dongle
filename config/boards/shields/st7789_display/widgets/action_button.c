@@ -88,7 +88,7 @@ static void apply_windows_status_colors(void) {
     set_menu_bg_color(card);
     set_frame_color(ink);
     set_frame_color_1(border);
-    set_layer_font_color(ink);
+    set_layer_font_color(0xC4B5FD);
     set_layer_font_bg_color(card);
     set_wpm_font_color(ink);
     set_wpm_font_1_color(secondary);

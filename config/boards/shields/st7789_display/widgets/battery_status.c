@@ -52,16 +52,20 @@ static const uint16_t font_offset = 2;
 #endif
 
 #ifdef CONFIG_USE_BATTERY_FONT_3X5
-static const uint16_t scale = 4;
+static const uint16_t scale = 5;
 static const uint16_t font_width = 3;
 static const uint16_t font_height = 5;
+static const uint16_t compact_font_y_offset = 0;
+static const uint16_t start_y = 102;
+static const uint16_t battery_y = 134;
 #else
-static const uint16_t scale = 4;
+static const uint16_t scale = 5;
 static const uint16_t font_width = 5;
 static const uint16_t font_height = 8;
+static const uint16_t compact_font_y_offset = 7;
+static const uint16_t start_y = 98;
+static const uint16_t battery_y = 139;
 #endif
-
-static const uint16_t start_y = 97;
 
 struct peripheral_battery_state {
     uint8_t source;
@@ -75,7 +79,8 @@ uint16_t x_position_scaled(uint16_t x, uint16_t index) {
 }
 
 static void print_realistic_percentage(uint16_t x, uint16_t y, uint16_t color, uint16_t bg_color) {
-    print_bitmap(scaled_bitmap_1, CHAR_PERCENTAGE, x, y, 4, color, bg_color, FONT_SIZE_3x5);
+    print_bitmap(scaled_bitmap_1, CHAR_PERCENTAGE, x, y + compact_font_y_offset, scale, color,
+                 bg_color, FONT_SIZE_3x5);
 }
 
 void print_percentage(uint8_t digit, uint16_t x, uint16_t y, uint16_t scale, uint16_t num_color,
@@ -102,10 +107,13 @@ void print_percentage(uint8_t digit, uint16_t x, uint16_t y, uint16_t scale, uin
 
     if (digit > 99) {
         /* Compact 100% so the fourth symbol does not touch the battery body. */
-        print_bitmap(scaled_bitmap_1, 1, x, y + 1, 4, num_color, bg_color, FONT_SIZE_3x5);
-        print_bitmap(scaled_bitmap_1, 0, x + 14, y + 1, 4, num_color, bg_color, FONT_SIZE_3x5);
-        print_bitmap(scaled_bitmap_1, 0, x + 28, y + 1, 4, num_color, bg_color, FONT_SIZE_3x5);
-        print_realistic_percentage(x + 42, y, percentage_color, bg_color);
+        print_bitmap(scaled_bitmap_1, 1, x, y + compact_font_y_offset, scale, num_color, bg_color,
+                     FONT_SIZE_3x5);
+        print_bitmap(scaled_bitmap_1, 0, x + 17, y + compact_font_y_offset, scale, num_color,
+                     bg_color, FONT_SIZE_3x5);
+        print_bitmap(scaled_bitmap_1, 0, x + 34, y + compact_font_y_offset, scale, num_color,
+                     bg_color, FONT_SIZE_3x5);
+        print_realistic_percentage(x + 51, y, percentage_color, bg_color);
         return;
     }
 
@@ -127,34 +135,37 @@ void print_percentage(uint8_t digit, uint16_t x, uint16_t y, uint16_t scale, uin
 
 static void print_battery_panel(uint8_t level, uint16_t panel_x, uint16_t num_color,
                                 uint16_t bg_color, uint16_t percentage_color) {
-    const uint16_t outline = rgb888_to_rgb565(0x4ADE80);
     const uint16_t card = get_menu_bg_color();
-    uint16_t fill = rgb888_to_rgb565(0x4ADE80);
-    if (level > 0 && level < 20) {
-        fill = rgb888_to_rgb565(0xD13438);
-    } else if (level > 0 && level < 40) {
-        fill = rgb888_to_rgb565(0xF7630C);
+    uint16_t level_color = percentage_color;
+    if (level >= 40) {
+        level_color = rgb888_to_rgb565(0x4ADE80);
+    } else if (level >= 20) {
+        level_color = rgb888_to_rgb565(0xF7630C);
+    } else if (level > 0) {
+        level_color = rgb888_to_rgb565(0xD13438);
     }
     const uint16_t battery_x = panel_x + 24;
-    const uint16_t battery_y = 134;
     const uint16_t inner_width = 54;
 #ifdef CONFIG_USE_BATTERY_FONT_3X5
-    const uint16_t percentage_x = panel_x + 32;
+    const uint16_t percentage_x = panel_x + 29;
 #else
-    const uint16_t percentage_x = panel_x + 24;
+    const uint16_t percentage_x = panel_x + 20;
 #endif
 
     print_filled_rounded_screen_area(panel_x, 95, 107, 66, 6, card);
 
-    print_percentage(level, percentage_x, start_y, scale, num_color, bg_color, percentage_color);
+    print_percentage(level, percentage_x, start_y, scale,
+                     level > 0 ? level_color : num_color, bg_color,
+                     level > 0 ? level_color : percentage_color);
 
-    print_filled_rounded_screen_area(battery_x, battery_y, 58, 22, 4, outline);
+    print_filled_rounded_screen_area(battery_x, battery_y, 58, 22, 4, level_color);
     print_filled_rounded_screen_area(battery_x + 2, battery_y + 2, inner_width, 18, 3, card);
-    print_filled_screen_area(battery_x + 58, battery_y + 6, 4, 10, outline);
+    print_filled_screen_area(battery_x + 58, battery_y + 6, 4, 10, level_color);
 
     if (level > 0) {
         uint16_t fill_width = ((uint16_t)level * inner_width + 99) / 100;
-        print_filled_rounded_screen_area(battery_x + 2, battery_y + 2, fill_width, 18, 3, fill);
+        print_filled_rounded_screen_area(battery_x + 2, battery_y + 2, fill_width, 18, 3,
+                                         level_color);
     }
 }
 
