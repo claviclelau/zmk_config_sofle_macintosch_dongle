@@ -215,6 +215,11 @@ static void print_connection_label(struct output_status_state state) {
                            symbol_scale, usb_color, background);
     print_bitmap_transport(scaled_bitmap_symbol, TRANSPORT_BLUETOOTH, true, 196, 7, symbol_scale,
                            bluetooth_color, background);
+    if (state.selected_endpoint.transport == ZMK_TRANSPORT_USB) {
+        print_filled_screen_area(176, 24, symbol_width, 2, get_frame_color());
+    } else if (state.selected_endpoint.transport == ZMK_TRANSPORT_BLE) {
+        print_filled_screen_area(196, 24, symbol_width, 2, get_frame_color());
+    }
     if (state.active_profile_index >= 0 && state.active_profile_index <= 4) {
         char profile[] = {(char)('1' + state.active_profile_index)};
         print_char_array(scaled_bitmap_bt_num, profile, 216, 4, 4, bluetooth_color, background,

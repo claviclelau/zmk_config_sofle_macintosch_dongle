@@ -20,6 +20,14 @@
 
 **More Info about the web app please access this [github page](https://github.com/nickcoutsos/keymap-editor)**  
 
+# Dongle status display
+
+The top-right USB and Bluetooth icons show connection status. A light underline
+identifies the selected output, independently of whether it is connected. The
+number beside Bluetooth identifies the active profile.
+
+The bottom cards show CTRL, SHIFT, WIN, and ALT, with pressed modifiers highlighted.
+
 #  Keymap
 <img src="keymap-drawer/sofle_dongle.svg" >
  

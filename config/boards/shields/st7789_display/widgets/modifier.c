@@ -115,7 +115,7 @@ static void print_modifier_key(const char *label, uint8_t label_length, const ui
 
     uint16_t text_width = (label_length * 9) + (label_length - 1);
     print_char_array(scaled_bitmap_modifier_font, (char *)label, x + (width - text_width) / 2,
-                     modifier_y + 33, 3, foreground, background, FONT_SIZE_3x6, 1, label_length,
+                     modifier_y + 33, 3, foreground, background, FONT_SIZE_3x5, 1, label_length,
                      label_length);
 }
 

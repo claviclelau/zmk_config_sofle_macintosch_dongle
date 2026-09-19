@@ -167,7 +167,7 @@ static void print_windows_screen_saver(void) {
 
 static void print_screen_saver_image(const uint8_t *image, uint16_t width, uint16_t height) {
     struct display_buffer_descriptor descriptor = {
-        .buf_size = width * height,
+        .buf_size = width * height * 2u,
         .pitch = width,
         .width = width,
         .height = height,
