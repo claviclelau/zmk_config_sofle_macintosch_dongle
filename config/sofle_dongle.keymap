@@ -220,7 +220,7 @@
 &kp TAB           &kp Q   &kp W      &kp E   &kp R      &kp T      &kp Y              &kp U            &kp I         &kp O          &kp P   &kp DEL
 &kp LEFT_CONTROL  &kp A   &kp S      &kp D   &kp F      &kp G      &mkp_ml LCLK       &mkp_ml LCLK     &kp H         &kp J          &kp K   &kp L    &kp SEMI   &kp SINGLE_QUOTE
 &kp LEFT_SHIFT    &kp Z   &kp X      &kp C   &kp V      &kp B      &msc_ml SCRL_DOWN  &msc_ml SCRL_UP  &mkp_ml LCLK  &mkp_ml RCLK   &kp N   &kp M    &kp COMMA  &kp PERIOD        &kp SLASH  &kp BACKSLASH
-&kp LEFT_GUI      &none   &kp ENTER  &mo 1   &mkp LCLK  &mkp RCLK  &mo 2              &kp SPACE        &none         &kp RIGHT_ALT
+&kp LEFT_GUI      &mo 4   &kp ENTER  &mo 1   &mkp LCLK  &mkp RCLK  &mo 2              &kp SPACE        &mo 5         &kp RIGHT_ALT
             >;
         };
 
@@ -232,7 +232,7 @@
 &none        &none  &none                            &none      &mod_with_latency LEFT_ALT SPACE  &none                     &none  &none  &none  &none  &none  &none
 &none        &none  &mod_alt_latency LEFT_CONTROL S  &none      &none                             &mod_with_latency LALT G  &none  &none  &none  &none  &none  &none  &none  &none
 &none        &none  &none                            &kp LG(C)  &mod_alt_latency LEFT_CONTROL V   &none                     &none  &none  &none  &none  &none  &none  &none  &none  &none  &none
-&none        &none  &none                            &none      &none                             &none                     &none  &none  &none  &none
+&none        &mo 4  &none                            &mo 1      &mkp LCLK                         &mkp RCLK                 &mo 2  &none  &mo 5  &none
             >;
         };
 
@@ -244,7 +244,7 @@
 &none        &none  &none  &none  &rgb_ug RGB_TOG  &out OUT_TOG  &none  &out OUT_USB  &none  &none  &none  &none
 &none        &none  &none  &none  &none            &none         &none  &none         &none  &none  &none  &bl BL_TOG  &none  &none
 &none        &none  &none  &none  &none            &out OUT_BLE  &none  &none         &none  &none  &none  &none       &none  &none  &none  &none
-&none        &none  &none  &none  &none            &mo 5         &none  &none         &none  &none
+&none        &mo 4  &none  &mo 1  &mkp LCLK        &mkp RCLK     &mo 2  &none         &mo 5  &none
             >;
         };
     };
