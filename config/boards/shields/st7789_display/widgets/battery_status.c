@@ -52,7 +52,7 @@ static const uint16_t font_offset = 2;
 #endif
 
 #ifdef CONFIG_USE_BATTERY_FONT_3X5
-static const uint16_t scale = 3;
+static const uint16_t scale = 4;
 static const uint16_t font_width = 3;
 static const uint16_t font_height = 5;
 #else
@@ -61,7 +61,7 @@ static const uint16_t font_width = 5;
 static const uint16_t font_height = 8;
 #endif
 
-static const uint16_t start_y = 172;
+static const uint16_t start_y = 97;
 
 struct peripheral_battery_state {
     uint8_t source;
@@ -75,7 +75,7 @@ uint16_t x_position_scaled(uint16_t x, uint16_t index) {
 }
 
 static void print_realistic_percentage(uint16_t x, uint16_t y, uint16_t color, uint16_t bg_color) {
-    print_bitmap(scaled_bitmap_1, CHAR_PERCENTAGE, x, y, 3, color, bg_color, FONT_SIZE_3x5);
+    print_bitmap(scaled_bitmap_1, CHAR_PERCENTAGE, x, y, 4, color, bg_color, FONT_SIZE_3x5);
 }
 
 void print_percentage(uint8_t digit, uint16_t x, uint16_t y, uint16_t scale, uint16_t num_color,
@@ -102,10 +102,10 @@ void print_percentage(uint8_t digit, uint16_t x, uint16_t y, uint16_t scale, uin
 
     if (digit > 99) {
         /* Compact 100% so the fourth symbol does not touch the battery body. */
-        print_bitmap(scaled_bitmap_1, 1, x, y + 2, 2, num_color, bg_color, FONT_SIZE_3x5);
-        print_bitmap(scaled_bitmap_1, 0, x + 8, y + 2, 2, num_color, bg_color, FONT_SIZE_3x5);
-        print_bitmap(scaled_bitmap_1, 0, x + 16, y + 2, 2, num_color, bg_color, FONT_SIZE_3x5);
-        print_realistic_percentage(x + 24, y, percentage_color, bg_color);
+        print_bitmap(scaled_bitmap_1, 1, x, y + 1, 4, num_color, bg_color, FONT_SIZE_3x5);
+        print_bitmap(scaled_bitmap_1, 0, x + 14, y + 1, 4, num_color, bg_color, FONT_SIZE_3x5);
+        print_bitmap(scaled_bitmap_1, 0, x + 28, y + 1, 4, num_color, bg_color, FONT_SIZE_3x5);
+        print_realistic_percentage(x + 42, y, percentage_color, bg_color);
         return;
     }
 
@@ -125,42 +125,47 @@ void print_percentage(uint8_t digit, uint16_t x, uint16_t y, uint16_t scale, uin
 #endif
 }
 
-static void print_battery_panel(uint8_t level, uint16_t panel_x, Character side_label,
-                                uint16_t num_color, uint16_t bg_color, uint16_t percentage_color) {
-    const uint16_t black = get_frame_color();
-    const uint16_t white = get_menu_bg_color();
-    const uint16_t green = rgb888_to_rgb565(0x42D85A);
-    const uint16_t battery_x = panel_x + 56;
-    const uint16_t battery_y = 172;
-    const uint16_t inner_width = 34;
+static void print_battery_panel(uint8_t level, uint16_t panel_x, uint16_t num_color,
+                                uint16_t bg_color, uint16_t percentage_color) {
+    const uint16_t outline = rgb888_to_rgb565(0x4ADE80);
+    const uint16_t card = get_menu_bg_color();
+    uint16_t fill = rgb888_to_rgb565(0x4ADE80);
+    if (level > 0 && level < 20) {
+        fill = rgb888_to_rgb565(0xD13438);
+    } else if (level > 0 && level < 40) {
+        fill = rgb888_to_rgb565(0xF7630C);
+    }
+    const uint16_t battery_x = panel_x + 24;
+    const uint16_t battery_y = 134;
+    const uint16_t inner_width = 54;
+#ifdef CONFIG_USE_BATTERY_FONT_3X5
+    const uint16_t percentage_x = panel_x + 32;
+#else
+    const uint16_t percentage_x = panel_x + 24;
+#endif
 
-    /* Clear only this half so a shorter value/bar never leaves old pixels behind. */
-    /* Stop at x=226 on the right panel; x=227 is the window's vertical border. */
-    print_filled_screen_area(panel_x, 161, 106, 37, white);
+    print_filled_rounded_screen_area(panel_x, 95, 107, 66, 6, card);
 
-    print_bitmap(scaled_bitmap_1, side_label, panel_x + 3, start_y, scale, black, white,
-                 FONT_SIZE_3x5);
-    print_percentage(level, panel_x + 17, start_y, scale, num_color, bg_color, percentage_color);
+    print_percentage(level, percentage_x, start_y, scale, num_color, bg_color, percentage_color);
 
-    /* Macintosh-style black outline, white interior and a live green charge bar. */
-    print_filled_screen_area(battery_x, battery_y, 38, 16, black);
-    print_filled_screen_area(battery_x + 2, battery_y + 2, inner_width, 12, white);
-    print_filled_screen_area(battery_x + 38, battery_y + 4, 4, 8, black);
+    print_filled_rounded_screen_area(battery_x, battery_y, 58, 22, 4, outline);
+    print_filled_rounded_screen_area(battery_x + 2, battery_y + 2, inner_width, 18, 3, card);
+    print_filled_screen_area(battery_x + 58, battery_y + 6, 4, 10, outline);
 
     if (level > 0) {
         uint16_t fill_width = ((uint16_t)level * inner_width + 99) / 100;
-        print_filled_screen_area(battery_x + 2, battery_y + 2, fill_width, 12, green);
+        print_filled_rounded_screen_area(battery_x + 2, battery_y + 2, fill_width, 18, 3, fill);
     }
 }
 
 void set_battery_symbol() {
 #ifdef CONFIG_SHOW_SINGLE_BATTERY
-    print_battery_panel(battery_state_0.level, 66, CHAR_L, get_battery_num_color(),
+    print_battery_panel(battery_state_0.level, 67, get_battery_num_color(),
                         get_battery_bg_color(), get_battery_percentage_color());
 #else
-    print_battery_panel(battery_state_0.level, 11, CHAR_L, get_battery_num_color(),
+    print_battery_panel(battery_state_0.level, 9, get_battery_num_color(),
                         get_battery_bg_color(), get_battery_percentage_color());
-    print_battery_panel(battery_state_1.level, 121, CHAR_R, get_battery_num_color_1(),
+    print_battery_panel(battery_state_1.level, 124, get_battery_num_color_1(),
                         get_battery_bg_color_1(), get_battery_percentage_color_1());
 #endif
 }
@@ -168,15 +173,15 @@ void set_battery_symbol() {
 static void redraw_battery_source(uint8_t source) {
 #ifdef CONFIG_SHOW_SINGLE_BATTERY
     if (source == 0) {
-        print_battery_panel(battery_state_0.level, 66, CHAR_L, get_battery_num_color(),
+        print_battery_panel(battery_state_0.level, 67, get_battery_num_color(),
                             get_battery_bg_color(), get_battery_percentage_color());
     }
 #else
     if (source == 0) {
-        print_battery_panel(battery_state_0.level, 11, CHAR_L, get_battery_num_color(),
+        print_battery_panel(battery_state_0.level, 9, get_battery_num_color(),
                             get_battery_bg_color(), get_battery_percentage_color());
     } else if (source == 1) {
-        print_battery_panel(battery_state_1.level, 121, CHAR_R, get_battery_num_color_1(),
+        print_battery_panel(battery_state_1.level, 124, get_battery_num_color_1(),
                             get_battery_bg_color_1(), get_battery_percentage_color_1());
     }
 #endif

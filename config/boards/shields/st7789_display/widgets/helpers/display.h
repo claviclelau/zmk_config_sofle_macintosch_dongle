@@ -101,6 +101,8 @@ void render_filled_rectangle(uint8_t *buf_area, uint8_t x, uint8_t y, uint8_t wi
                              uint8_t height);
 void print_filled_screen_area(uint16_t x, uint16_t y, uint16_t width, uint16_t height,
                               uint16_t color);
+void print_filled_rounded_screen_area(uint16_t x, uint16_t y, uint16_t width, uint16_t height,
+                                      uint16_t radius, uint16_t color);
 void print_checkerboard_screen(uint16_t light_color, uint16_t dark_color);
 
 void set_default_screen(DefaultScreen screen);

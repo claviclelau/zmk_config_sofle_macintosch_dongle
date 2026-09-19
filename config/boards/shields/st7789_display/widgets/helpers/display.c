@@ -1718,6 +1718,31 @@ void print_filled_screen_area(uint16_t x, uint16_t y, uint16_t width, uint16_t h
     }
 }
 
+void print_filled_rounded_screen_area(uint16_t x, uint16_t y, uint16_t width, uint16_t height,
+                                      uint16_t radius, uint16_t color) {
+    radius = MIN(radius, MIN(width / 2, height / 2));
+    if (radius == 0) {
+        print_filled_screen_area(x, y, width, height, color);
+        return;
+    }
+
+    print_filled_screen_area(x, y + radius, width, height - (radius * 2), color);
+    for (uint16_t row = 0; row < radius; row++) {
+        uint16_t distance_y = radius - row;
+        uint16_t distance_x = 0;
+        while ((uint32_t)(distance_x + 1) * (distance_x + 1) +
+                   (uint32_t)distance_y * distance_y <=
+               (uint32_t)radius * radius) {
+            distance_x++;
+        }
+
+        uint16_t inset = radius - distance_x;
+        uint16_t row_width = width - (inset * 2);
+        print_filled_screen_area(x + inset, y + row, row_width, 1, color);
+        print_filled_screen_area(x + inset, y + height - 1 - row, row_width, 1, color);
+    }
+}
+
 void print_checkerboard_screen(uint16_t light_color, uint16_t dark_color) {
     uint16_t *pixels = (uint16_t *)buf_screen_area;
 

@@ -30,25 +30,12 @@ static struct output_status_state status_state;
 static uint16_t *scaled_bitmap_status;
 static uint16_t *scaled_bitmap_symbol;
 static uint16_t *scaled_bitmap_bt_num;
-static uint16_t logo_bitmap[34 * 42];
-
-static uint16_t to_display_color(uint16_t color) { return (color >> 8) | (color << 8); }
-
-static void write_logo_bitmap(uint16_t x, uint16_t y, uint16_t width, uint16_t height) {
-    struct display_buffer_descriptor descriptor = {
-        .buf_size = width * height,
-        .pitch = width,
-        .width = width,
-        .height = height,
-    };
-    display_write_wrapper(x, y, &descriptor, (uint8_t *)logo_bitmap);
-}
 
 static const uint16_t status_height = 9;
 static const uint16_t status_width = 9;
 static const uint16_t status_scale = 3;
 
-static const uint16_t symbol_scale = 2;
+static const uint16_t symbol_scale = 1;
 static const uint16_t symbol_width = 9;
 static const uint16_t symbol_height = 15;
 
@@ -194,9 +181,9 @@ void print_bluetooth_profiles(uint16_t x, uint16_t y, struct output_status_state
 }
 
 void print_symbols(uint16_t usb_x, uint16_t ble_x, uint16_t y, struct output_status_state state) {
-    const uint16_t usb_active = rgb888_to_rgb565(0xFFD700);
-    const uint16_t ble_active = rgb888_to_rgb565(0x008FD5);
-    const uint16_t inactive = rgb888_to_rgb565(0x808080);
+    const uint16_t usb_active = rgb888_to_rgb565(0x38BDF8);
+    const uint16_t ble_active = rgb888_to_rgb565(0xA78BFA);
+    const uint16_t inactive = rgb888_to_rgb565(0x475569);
 
     switch (state.selected_endpoint.transport) {
     case ZMK_TRANSPORT_USB:
@@ -214,103 +201,43 @@ void print_symbols(uint16_t usb_x, uint16_t ble_x, uint16_t y, struct output_sta
     }
 }
 
-static void print_output_button(uint16_t x, uint16_t y, uint16_t width, uint16_t height,
-                                const char text[], uint8_t text_len, bool selected,
-                                uint16_t selected_background) {
-    const uint16_t black = get_frame_color();
-    const uint16_t white = get_menu_bg_color();
-    const uint16_t foreground = selected ? white : black;
-    const uint16_t background = selected ? selected_background : white;
-    const uint8_t factor = 2;
-    const uint16_t character_width = (7 * factor) + 1;
-    const uint16_t character_height = (9 * factor) + 1;
-    const uint16_t gap = factor + 1;
-    const uint16_t text_width =
-        (text_len * character_width) + ((text_len > 0 ? text_len - 1 : 0) * gap);
-    const uint16_t text_x = x + (width - text_width) / 2;
-    const uint16_t text_y = y + (height - character_height) / 2;
+static void print_connection_label(struct output_status_state state) {
+    const uint16_t background = rgb888_to_rgb565(0x070B14);
+    const uint16_t usb_color =
+        rgb888_to_rgb565(state.usb_is_hid_ready ? 0xFFD700 : 0x475569);
+    const uint16_t bluetooth_color =
+        rgb888_to_rgb565(state.active_profile_connected
+                             ? 0x008FD5
+                             : (state.active_profile_bonded ? 0xFBBF24 : 0x475569));
 
-    print_filled_screen_area(x, y, width, height, black);
-    print_filled_screen_area(x + 1, y + 1, width - 2, height - 2, background);
-    print_layer_font_text(scaled_bitmap_bt_num, text, text_len, text_x, text_y, factor, foreground,
-                          background);
-}
-
-static void print_transport_icons(struct output_status_state state) {
-    /* Original transport glyphs: active USB is yellow, active BLE is sky blue,
-     * and whichever transport is inactive is neutral grey. */
-    print_symbols(14, 36, 117, state);
-}
-
-static void print_profile_button(uint8_t profile, bool selected) {
-    static const uint32_t profile_colors[] = {
-        0x73B55B, /* green  */
-        0xFFD700, /* same yellow as the active USB icon */
-        0xC83B3F, /* red: darker for white-number contrast    */
-        0x773B8F, /* purple: darker for white-number contrast */
-        0x4798C8, /* blue   */
-    };
-
-    if (profile > 4) {
-        return;
+    print_filled_screen_area(176, 3, 64, 23, background);
+    print_bitmap_transport(scaled_bitmap_symbol, TRANSPORT_USB, state.usb_is_hid_ready, 176, 7,
+                           symbol_scale, usb_color, background);
+    print_bitmap_transport(scaled_bitmap_symbol, TRANSPORT_BLUETOOTH, true, 196, 7, symbol_scale,
+                           bluetooth_color, background);
+    if (state.active_profile_index >= 0 && state.active_profile_index <= 4) {
+        char profile[] = {(char)('1' + state.active_profile_index)};
+        print_char_array(scaled_bitmap_bt_num, profile, 216, 4, 4, bluetooth_color, background,
+                         FONT_SIZE_3x5, 1, ARRAY_SIZE(profile), ARRAY_SIZE(profile));
     }
-    char number[] = {(char)('1' + profile)};
-    /* USB, Bluetooth and all five profile slots share one centered horizontal row. */
-    print_output_button(58 + (profile * 25), 118, 24, 28, number, ARRAY_SIZE(number), selected,
-                        rgb888_to_rgb565(profile_colors[profile]));
-}
-
-static void print_classic_macintosh_icon(void) {
-    const uint16_t black = get_frame_color();
-    static const char *const rows[] = {
-        "..#############################..", ".###############################.",
-        "###...........................###", "##.............................##",
-        "##...#######################...##", "##..#########################..##",
-        "##..##.....................##..##", "##..##.....................##..##",
-        "##..##.....................##..##", "##..##....##....##...##....##..##",
-        "##..##....##....##...##....##..##", "##..##....##....##...##....##..##",
-        "##..##..........##.........##..##", "##..##..........##.........##..##",
-        "##..##........####.........##..##", "##..##........####.........##..##",
-        "##..##.....................##..##", "##..##......##....##.......##..##",
-        "##..##......########.......##..##", "##..##.......######........##..##",
-        "##..##.....................##..##", "##..##.....................##..##",
-        "##..#########################..##", "##...#######################...##",
-        "##.............................##", "##.............................##",
-        "##.............................##", "##.............................##",
-        "##....................####.....##", "##..###............#########...##",
-        "##..###.............########...##", "##.............................##",
-        "##.............................##", "##.............................##",
-        "##.............................##", "#################################",
-        ".###############################.", ".##...........................##.",
-        ".##...........................##.", ".##...........................##.",
-        ".###############################.", ".###############################.",
-    };
-
-    /* Compose the 33 x 42 monochrome sampling in RAM, then send it in one transfer. */
-    uint16_t white = to_display_color(get_menu_bg_color());
-    uint16_t black_pixel = to_display_color(black);
-    for (uint16_t i = 0; i < 33 * 42; i++) {
-        logo_bitmap[i] = white;
-    }
-    for (uint8_t y = 0; y < ARRAY_SIZE(rows); y++) {
-        for (uint8_t x = 0; x < 33; x++) {
-            if (rows[y][x] == '#') {
-                logo_bitmap[(y * 33) + x] = black_pixel;
-            }
-        }
-    }
-    write_logo_bitmap(187, 111, 33, 42);
 }
 
 void set_status_symbol() {
-    /* One centered black-and-white output panel spanning the full middle row. */
-    print_filled_screen_area(11, 105, 216, 55, get_menu_bg_color());
-    print_classic_macintosh_icon();
-    print_transport_icons(status_state);
+    const uint16_t background = rgb888_to_rgb565(0x070B14);
+    const uint16_t color = rgb888_to_rgb565(0xA7B0C5);
+    char name[] = "YIMING";
+    char suffix[] = "S";
+    char keyboard[] = "KB";
 
-    for (uint8_t profile = 0; profile < 5; profile++) {
-        print_profile_button(profile, status_state.active_profile_index == profile);
-    }
+    print_filled_screen_area(0, 0, 240, 28, background);
+    print_char_array(scaled_bitmap_bt_num, name, 4, 4, 4, color, background, FONT_SIZE_3x5, 1,
+                     ARRAY_SIZE(name) - 1, ARRAY_SIZE(name) - 1);
+    print_filled_screen_area(84, 4, 4, 8, color);
+    print_char_array(scaled_bitmap_bt_num, suffix, 92, 4, 4, color, background, FONT_SIZE_3x5, 1,
+                     ARRAY_SIZE(suffix) - 1, ARRAY_SIZE(suffix) - 1);
+    print_char_array(scaled_bitmap_bt_num, keyboard, 120, 4, 4, color, background, FONT_SIZE_3x5, 1,
+                     ARRAY_SIZE(keyboard) - 1, ARRAY_SIZE(keyboard) - 1);
+    print_connection_label(status_state);
 }
 
 void output_status_update_cb(struct output_status_state state) {
@@ -318,17 +245,11 @@ void output_status_update_cb(struct output_status_state state) {
     status_state = state;
     if (status_widget_initialized) {
         if (previous.selected_endpoint.transport != state.selected_endpoint.transport ||
-            previous.usb_is_hid_ready != state.usb_is_hid_ready) {
-            print_transport_icons(state);
-        }
-
-        if (previous.active_profile_index != state.active_profile_index) {
-            if (previous.active_profile_index >= 0 && previous.active_profile_index <= 4) {
-                print_profile_button(previous.active_profile_index, false);
-            }
-            if (state.active_profile_index >= 0 && state.active_profile_index <= 4) {
-                print_profile_button(state.active_profile_index, true);
-            }
+            previous.usb_is_hid_ready != state.usb_is_hid_ready ||
+            previous.active_profile_connected != state.active_profile_connected ||
+            previous.active_profile_bonded != state.active_profile_bonded ||
+            previous.active_profile_index != state.active_profile_index) {
+            print_connection_label(state);
         }
     }
 }

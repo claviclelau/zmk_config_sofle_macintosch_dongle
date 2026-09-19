@@ -13,3 +13,5 @@ void zmk_widget_action_button_init(void);
 void start_action_button(bool is_menu_on);
 void set_theme_threshold(uint16_t term_ms);
 void set_mute_threshold(uint16_t term_ms);
+void start_screen_saver(void);
+void stop_screen_saver(void);

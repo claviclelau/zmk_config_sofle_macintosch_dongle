@@ -26,34 +26,11 @@ struct layer_status_state {
 static bool layer_widget_running = false;
 static struct layer_status_state current_layer;
 static uint16_t *scaled_bitmap_layer_font;
-/* Shared scratch space avoids placing a 1.2 KB glyph buffer on the display thread stack. */
-static uint16_t layer_glyph_bitmap[(7 * 3 + 1) * (9 * 3 + 1)];
-/* -1 highlights the up button, +1 highlights the down button. */
-static int8_t layer_scroll_direction = 0;
-static struct k_work_delayable layer_scroll_reset_work;
-
-static const uint16_t scroll_arrow_up[] = {
-    0,0,0,0,1,0,0,0,0,
-    0,0,0,1,1,1,0,0,0,
-    0,0,1,1,1,1,1,0,0,
-    0,1,1,1,1,1,1,1,0,
-    0,0,0,1,1,1,0,0,0,
-    0,0,0,1,1,1,0,0,0,
-    0,0,0,1,1,1,0,0,0,
-};
-
-static const uint16_t scroll_arrow_down[] = {
-    0,0,0,1,1,1,0,0,0,
-    0,0,0,1,1,1,0,0,0,
-    0,0,0,1,1,1,0,0,0,
-    0,1,1,1,1,1,1,1,0,
-    0,0,1,1,1,1,1,0,0,
-    0,0,0,1,1,1,0,0,0,
-    0,0,0,0,1,0,0,0,0,
-};
+/* Shared scratch space avoids placing the glyph buffer on the display thread stack. */
+static uint16_t layer_glyph_bitmap[(7 * 5 + 1) * (9 * 5 + 1)];
 
 /* Complete A-Z clean sans-serif font for every possible English layer name. */
-static const char mac_layer_chars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+static const char mac_layer_chars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'";
 static const uint8_t mac_layer_rows[][9] = {
     {0x1C, 0x22, 0x41, 0x41, 0x7F, 0x41, 0x41, 0x41, 0x41}, /* A */
     {0x7E, 0x41, 0x41, 0x41, 0x7E, 0x41, 0x41, 0x41, 0x7E}, /* B */
@@ -91,9 +68,10 @@ static const uint8_t mac_layer_rows[][9] = {
     {0x7F, 0x01, 0x02, 0x04, 0x08, 0x10, 0x10, 0x10, 0x10}, /* 7 */
     {0x3E, 0x41, 0x41, 0x41, 0x3E, 0x41, 0x41, 0x41, 0x3E}, /* 8 */
     {0x3E, 0x41, 0x41, 0x41, 0x3F, 0x01, 0x01, 0x01, 0x3E}, /* 9 */
+    {0x18, 0x18, 0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}, /* ' */
 };
 
-static bool make_mac_layer_glyph(char c, uint8_t factor, uint16_t *bitmap) {
+static bool make_mac_layer_glyph(char c, uint8_t x_factor, uint8_t y_factor, uint16_t *bitmap) {
     if (c >= 'a' && c <= 'z') {
         c -= 'a' - 'A';
     }
@@ -102,8 +80,8 @@ static bool make_mac_layer_glyph(char c, uint8_t factor, uint16_t *bitmap) {
         if (mac_layer_chars[glyph] != c) {
             continue;
         }
-        uint8_t width = (7 * factor) + 1;
-        uint8_t height = (9 * factor) + 1;
+        uint8_t width = (7 * x_factor) + 1;
+        uint8_t height = (9 * y_factor) + 1;
         memset(bitmap, 0, width * height * sizeof(uint16_t));
 
         for (uint8_t source_y = 0; source_y < 9; source_y++) {
@@ -112,10 +90,10 @@ static bool make_mac_layer_glyph(char c, uint8_t factor, uint16_t *bitmap) {
                     continue;
                 }
                 /* One extra output pixel makes the strokes subtly heavier. */
-                for (uint8_t dy = 0; dy <= factor; dy++) {
-                    for (uint8_t dx = 0; dx <= factor; dx++) {
-                        bitmap[((source_y * factor + dy) * width) +
-                               (source_x * factor + dx)] = 1;
+                for (uint8_t dy = 0; dy <= y_factor; dy++) {
+                    for (uint8_t dx = 0; dx <= x_factor; dx++) {
+                        bitmap[((source_y * y_factor + dy) * width) +
+                               (source_x * x_factor + dx)] = 1;
                     }
                 }
             }
@@ -127,60 +105,15 @@ static bool make_mac_layer_glyph(char c, uint8_t factor, uint16_t *bitmap) {
 
 void print_layer_font_text(uint16_t *render_buffer, const char *text, uint8_t length, uint16_t x,
                            uint16_t y, uint8_t factor, uint16_t color, uint16_t bg_color) {
-    factor = CLAMP(factor, 1, 3);
+    factor = CLAMP(factor, 1, 5);
     uint16_t glyph_width = (7 * factor) + 1;
     uint16_t glyph_height = (9 * factor) + 1;
     uint16_t gap = factor + 1;
     for (uint8_t i = 0; i < length; i++) {
-        if (make_mac_layer_glyph(text[i], factor, layer_glyph_bitmap)) {
+        if (make_mac_layer_glyph(text[i], factor, factor, layer_glyph_bitmap)) {
             render_bitmap(render_buffer, layer_glyph_bitmap, x + i * (glyph_width + gap), y,
                           glyph_width, glyph_height, 1, color, bg_color);
         }
-    }
-}
-
-static void print_scroll_button(uint16_t x, uint16_t y, const uint16_t arrow[], bool selected) {
-    const uint16_t black = get_layer_font_color();
-    const uint16_t white = get_layer_font_bg_color();
-    const uint16_t foreground = selected ? white : black;
-    const uint16_t background = selected ? black : white;
-
-    print_filled_screen_area(x, y, 14, 20, black);
-    print_filled_screen_area(x + 1, y + 1, 12, 18, background);
-    render_bitmap(scaled_bitmap_layer_font, (uint16_t *)arrow, x + 2, y + 6, 9, 7, 1,
-                  foreground, background);
-}
-
-static void print_layer_scrollbar_at(uint16_t x) {
-    const uint16_t black = get_layer_font_color();
-    const uint16_t white = get_layer_font_bg_color();
-
-    print_scroll_button(x, 32, scroll_arrow_up, layer_scroll_direction < 0);
-
-    /* Recessed blank track between the two classic square arrow buttons. */
-    print_filled_screen_area(x, 52, 14, 31, black);
-    print_filled_screen_area(x + 1, 53, 12, 29, white);
-
-    print_scroll_button(x, 83, scroll_arrow_down, layer_scroll_direction > 0);
-}
-
-static void print_layer_scrollbars(void) {
-    print_layer_scrollbar_at(12);
-    print_layer_scrollbar_at(212);
-}
-
-static void print_layer_scroll_buttons(void) {
-    print_scroll_button(12, 32, scroll_arrow_up, layer_scroll_direction < 0);
-    print_scroll_button(12, 83, scroll_arrow_down, layer_scroll_direction > 0);
-    print_scroll_button(212, 32, scroll_arrow_up, layer_scroll_direction < 0);
-    print_scroll_button(212, 83, scroll_arrow_down, layer_scroll_direction > 0);
-}
-
-static void layer_scroll_reset_handler(struct k_work *work) {
-    ARG_UNUSED(work);
-    layer_scroll_direction = 0;
-    if (layer_widget_running) {
-        print_layer_scroll_buttons();
     }
 }
 
@@ -189,34 +122,34 @@ static void print_layer_label(void) {
         return;
     }
 
-    const uint16_t pane_x = 11;
+    const uint16_t pane_x = 9;
     const uint16_t pane_y = 31;
-    const uint16_t pane_width = 216;
-    const uint16_t pane_height = 73;
-    /* Keep the label centered in the complete pane, not in the space left of the scrollbar. */
-    const uint16_t max_text_width = 166;
+    const uint16_t pane_width = 222;
+    const uint16_t pane_height = 56;
+    const uint16_t max_text_width = 206;
     size_t len = strlen(current_layer.label);
-    uint8_t factor = len <= 8 ? 3 : (len <= 13 ? 2 : 1);
-    uint16_t glyph_width = (7 * factor) + 1;
-    uint16_t glyph_height = (9 * factor) + 1;
-    uint16_t gap = factor + 1;
+    uint8_t x_factor = 3;
+    uint8_t y_factor = x_factor;
+    uint16_t glyph_width = (7 * x_factor) + 1;
+    uint16_t glyph_height = (9 * y_factor) + 1;
+    uint16_t gap = x_factor + 1;
     uint16_t total_width = len > 0 ? (len * glyph_width) + ((len - 1) * gap) : 0;
 
-    while (total_width > max_text_width && factor > 1) {
-        factor--;
-        glyph_width = (7 * factor) + 1;
-        glyph_height = (9 * factor) + 1;
-        gap = factor + 1;
+    while (total_width > max_text_width && x_factor > 1) {
+        x_factor--;
+        glyph_width = (7 * x_factor) + 1;
+        gap = x_factor + 1;
         total_width = (len * glyph_width) + ((len - 1) * gap);
     }
 
-    /* Clear only the label area; both scrollbars and their tracks stay untouched. */
-    print_filled_screen_area(27, pane_y, 185, pane_height, get_layer_font_bg_color());
+    print_filled_rounded_screen_area(pane_x, pane_y, pane_width, pane_height, 6,
+                                     get_layer_font_bg_color());
 
     uint16_t x = pane_x + (pane_width - MIN(total_width, pane_width)) / 2;
     uint16_t y = pane_y + (pane_height - glyph_height) / 2;
-    for (size_t i = 0; i < len && x + glyph_width <= 212; i++) {
-        if (make_mac_layer_glyph(current_layer.label[i], factor, layer_glyph_bitmap)) {
+    for (size_t i = 0; i < len && x + glyph_width <= pane_x + pane_width; i++) {
+        if (make_mac_layer_glyph(current_layer.label[i], x_factor, y_factor,
+                                 layer_glyph_bitmap)) {
             render_bitmap(scaled_bitmap_layer_font, layer_glyph_bitmap, x, y, glyph_width,
                           glyph_height, 1,
                           get_layer_font_color(), get_layer_font_bg_color());
@@ -232,29 +165,14 @@ void print_layer() {
     }
 
     /* Full draw is reserved for initial screen creation and theme changes. */
-    print_filled_screen_area(11, 31, 216, 73, get_layer_font_bg_color());
+    print_filled_rounded_screen_area(9, 31, 222, 56, 6, get_layer_font_bg_color());
     print_layer_label();
-    print_layer_scrollbars();
 }
 
 static void layer_status_update_cb(struct layer_status_state state) {
-    bool direction_changed = false;
-    if (state.index > current_layer.index) {
-        layer_scroll_direction = 1;
-        direction_changed = true;
-    } else if (state.index < current_layer.index) {
-        layer_scroll_direction = -1;
-        direction_changed = true;
-    }
     current_layer = state;
     if (layer_widget_running) {
         print_layer_label();
-        if (direction_changed) {
-            print_layer_scroll_buttons();
-        }
-        if (direction_changed) {
-            k_work_reschedule(&layer_scroll_reset_work, K_MSEC(1000));
-        }
     }
 }
 
@@ -269,18 +187,10 @@ ZMK_DISPLAY_WIDGET_LISTENER(widget_layer_status, struct layer_status_state, laye
 ZMK_SUBSCRIPTION(widget_layer_status, zmk_layer_state_changed);
 
 void zmk_widget_layer_init() {
-    scaled_bitmap_layer_font = k_malloc((7 * 3 + 1) * (9 * 3 + 1) * sizeof(uint16_t));
-    k_work_init_delayable(&layer_scroll_reset_work, layer_scroll_reset_handler);
+    scaled_bitmap_layer_font = k_malloc((7 * 5 + 1) * (9 * 5 + 1) * sizeof(uint16_t));
     widget_layer_status_init();
 }
 
-void start_layer_status() {
-    layer_scroll_direction = 0;
-    layer_widget_running = true;
-}
+void start_layer_status() { layer_widget_running = true; }
 
-void stop_layer_status() {
-    layer_widget_running = false;
-    layer_scroll_direction = 0;
-    k_work_cancel_delayable(&layer_scroll_reset_work);
-}
+void stop_layer_status() { layer_widget_running = false; }

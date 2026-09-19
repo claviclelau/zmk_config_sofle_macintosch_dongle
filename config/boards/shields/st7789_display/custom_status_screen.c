@@ -21,58 +21,44 @@
 #include <zephyr/logging/log.h>
 LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 
-#define SPLASH_DURATION_MS 50
-#define SPLASH_FINAL_COUNT 50 // 约 2.5 秒（50ms × 50）
+#define DASHBOARD_START_DELAY_MS 50
 
-static uint8_t splash_count = 0;
-static bool splash_finished = false;
+static bool dashboard_ready = false;
 
-/* === 阶段1：开机阶段 === */
+/* Defer the first draw until ZMK has loaded the LVGL screen. */
 void timer_splash(lv_timer_t *timer) {
-    if (splash_finished)
+    if (dashboard_ready) {
         return;
-
-    print_splash();
-    splash_count++;
-
-    if (splash_count >= SPLASH_FINAL_COUNT) {
-        LOG_INF("Splash finished → show menu");
-        initialize_battery_status();
-        print_menu();
-
-        lv_timer_pause(timer);
-        splash_finished = true;
     }
+
+    initialize_battery_status();
+    print_menu();
+    lv_timer_pause(timer);
+    dashboard_ready = true;
 }
 
-/* === 阶段2：监听活动状态变化 === */
 static int activity_listener_cb(const zmk_event_t *eh) {
     const struct zmk_activity_state_changed *event = as_zmk_activity_state_changed(eh);
     if (!event)
         return 0;
 
-    /* Do not let the initial ACTIVE event skip the 2.5 second boot splash. */
-    if (!splash_finished)
+    if (!dashboard_ready)
         return 0;
 
     if (event->state == ZMK_ACTIVITY_ACTIVE) {
-        LOG_INF("Keyboard active → show menu");
+        LOG_INF("Keyboard active: refresh dashboard");
+        stop_screen_saver();
         initialize_battery_status();
         print_menu();
     } else {
-        LOG_INF("Keyboard idle → show splash");
-        // Stop every widget before showing the splash. Each widget redraws
-        // asynchronously from its own event listener (BLE/USB, battery, wpm,
-        // layer, ...). If they stay "running" while the splash is shown, an
-        // incoming event will paint a connection sign or battery value on top
-        // of the splash. Clearing the flags keeps the idle screen clean.
+        LOG_INF("Keyboard idle: show minimal screen saver");
         stop_wpm_status();
         stop_modifier_status();
         stop_output_status();
         stop_battery_status();
         stop_animation();
         stop_layer_status();
-        print_splash();
+        start_screen_saver();
     }
 
     return 0;
@@ -95,8 +81,7 @@ lv_obj_t *zmk_display_status_screen() {
     zmk_widget_wpm_init();
     zmk_widget_modifier_init();
 
-    // 启动开机 splash 动画
-    lv_timer_create(timer_splash, SPLASH_DURATION_MS, NULL);
+    lv_timer_create(timer_splash, DASHBOARD_START_DELAY_MS, NULL);
 
     return lv_obj_create(NULL);
 }
