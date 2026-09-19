@@ -12,16 +12,11 @@
 #include <drivers/input_processor.h>
 #include <dt-bindings/zmk/modifiers.h>
 #include <zmk/hid.h>
-#include <zmk/keymap.h>
-
-#define LOWER_LAYER 1
-#define RAISE_LAYER 2
 
 static bool pointer_mode_active(void) {
     zmk_mod_flags_t modifiers = zmk_hid_get_explicit_mods();
 
-    return zmk_keymap_layer_active(LOWER_LAYER) || zmk_keymap_layer_active(RAISE_LAYER) ||
-           (modifiers & (MOD_LCTL | MOD_RCTL)) != 0;
+    return (modifiers & (MOD_LCTL | MOD_RCTL)) != 0;
 }
 
 static int trackpad_mode_handle_event(const struct device *dev, struct input_event *event,

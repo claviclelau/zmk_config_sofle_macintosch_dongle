@@ -9,7 +9,6 @@
 
 #include <zephyr/kernel.h>
 #include <zephyr/device.h>
-#include <stdlib.h>
 #include <zephyr/drivers/gpio.h>
 #include <zephyr/drivers/i2c.h>
 #include <zmk/event_manager.h>
@@ -36,23 +35,8 @@ K_THREAD_STACK_DEFINE(a320_workq_stack, A320_WORKQ_STACK_SIZE);
 static struct k_work_q a320_workq;
 
 /* ========================================================================= */
-/* Mouse and arrow-key tuning parameters configured through Kconfig. */
+/* Mouse tuning parameters configured through Kconfig. */
 /* ========================================================================= */
-
-// --- 滚轮灵敏度与粒度配置 ---
-#define SCROLL_INPUT_MAX CONFIG_A320_SCROLL_INPUT_MAX
-#define SCROLL_DIVISOR_SLOW CONFIG_A320_SCROLL_DIVISOR_SLOW
-#define SCROLL_DIVISOR_FAST CONFIG_A320_SCROLL_DIVISOR_FAST
-
-// --- Arrow key threshold / divisor ---
-#define ARROW_DEADZONE CONFIG_A320_SCROLL_DEADZONE
-#define ARROW_INPUT_MAX 128
-#define ARROW_DIVISOR_SLOW CONFIG_A320_SCROLL_DIVISOR_SLOW
-#define ARROW_DIVISOR_FAST CONFIG_A320_SCROLL_DIVISOR_FAST
-
-// --- 防误触锁定比例配置 ---
-#define DOMINANT_NUMERATOR CONFIG_A320_DOMINANT_NUMERATOR
-#define DOMINANT_DENOMINATOR CONFIG_A320_DOMINANT_DENOMINATOR
 
 // --- 鼠标指针基础配置 (Kconfig 为整数百分比，这里除以 100 转为浮点数) ---
 #define MOUSE_BASE_SPEED (CONFIG_A320_MOUSE_BASE_SPEED_PERCENT / 100.0f)
@@ -76,21 +60,15 @@ static struct k_work_q a320_workq;
 static uint32_t last_activity_time = 0;
 #define A320_WDT_TIMEOUT 200
 /* ========= 全局状态 ========= */
-static bool arrow_key_pressed = false;
 static bool slow_key_pressed = false;
-static bool last_arrow_key_pressed = false;
 uint32_t last_packet_time = 0;
 static bool touched = false;
 
-/* ========= Arrow + Slow key listener ========= */
+/* ========= Slow key listener ========= */
 static int special_key_listener_cb(const zmk_event_t *eh) {
     const struct zmk_position_state_changed *ev = as_zmk_position_state_changed(eh);
     if (!ev)
         return 0;
-    if (ev->position == 41) {
-        arrow_key_pressed = ev->state;
-        LOG_INF("Shift arrow mode %s", arrow_key_pressed ? "ENABLED" : "DISABLED");
-    }
 
     // ★ NEW: Slow key
     if (ev->position == 37) {
@@ -119,8 +97,6 @@ struct a320_data {
     struct gpio_callback motion_cb_data;
     struct k_work_delayable enable_irq_work; // ⭐ 新增
     uint32_t last_packet_time;
-    int16_t arrow_residue_x;
-    int16_t arrow_residue_y;
 };
 
 /* Read the selected variant's registers, always releasing the I2C mutex. */
@@ -185,45 +161,6 @@ static void a320_detect_variant(const struct device *dev) {
         (found_addr == A320_I2C_ADDR_3B) ? a320_read_packet_3b : a320_read_packet_37;
 }
 
-static inline void process_arrow_axis(const struct device *dev, int16_t delta, int16_t *residue,
-                                      uint16_t key_neg, uint16_t key_pos) {
-
-    int abs_delta = abs(delta);
-
-    if (abs_delta <= ARROW_DEADZONE) {
-        return;
-    }
-
-    if (abs_delta > ARROW_INPUT_MAX) {
-        abs_delta = ARROW_INPUT_MAX;
-    }
-
-    // ★ 非线性 divisor（更丝滑）
-    float t = (float)abs_delta / SCROLL_INPUT_MAX;
-    t = t * t;
-
-    float f_div = SCROLL_DIVISOR_SLOW - (SCROLL_DIVISOR_SLOW - SCROLL_DIVISOR_FAST) * t;
-
-    int divisor = (int)f_div;
-    if (divisor < 1)
-        divisor = 1;
-
-    *residue += delta; // 替换掉 dir_mult
-    int16_t arrow_ticks = *residue / divisor;
-    if (arrow_ticks != 0) {
-        uint16_t key = (arrow_ticks > 0) ? key_pos : key_neg;
-
-        // 触发 key press + release（脉冲）
-        input_report_key(dev, key, 1, true, K_FOREVER);
-        input_report_key(dev, key, 0, true, K_FOREVER);
-
-        *residue %= divisor;
-    }
-
-    // 阻尼（防止漂移）
-    *residue = (*residue * 3) / 4;
-}
-
 static void a320_work_cb(struct k_work *work) {
     struct a320_data *data = CONTAINER_OF(work, struct a320_data, work);
     const struct device *dev = data->dev;
@@ -233,11 +170,6 @@ static void a320_work_cb(struct k_work *work) {
     /* ========= WATCHDOG ========= */
     if (now - last_activity_time > A320_WDT_TIMEOUT) {
         LOG_WRN("A320 watchdog recovery");
-
-        data->arrow_residue_x = 0;
-        data->arrow_residue_y = 0;
-
-        last_arrow_key_pressed = arrow_key_pressed;
 
         touched = false;
         return;
@@ -286,45 +218,17 @@ static void a320_work_cb(struct k_work *work) {
     int16_t dx = total_dx;
     int16_t dy = total_dy;
 
-    /* ========= Arrow mode detection ========= */
-    bool just_enter_arrow = arrow_key_pressed && !last_arrow_key_pressed;
+    uint8_t a320_led_brt = indicator_tp_get_last_valid_brightness();
+    float a320_factor = 0.4f + 0.01f * a320_led_brt;
 
-    if (arrow_key_pressed) {
+    float slow_mult = slow_key_pressed ? SLOW_KEY_MULTIPLIER : 1.0f;
 
-        if (just_enter_arrow) {
-            data->arrow_residue_x = dx;
-            data->arrow_residue_y = dy;
-        }
+    float fx = dx * 3 / 4 * a320_factor * slow_mult;
+    float fy = dy * 3 / 4 * a320_factor * slow_mult;
 
-        int abs_dx = abs(dx);
-        int abs_dy = abs(dy);
+    input_report_rel(dev, INPUT_REL_HWHEEL, (int)fx, false, K_NO_WAIT);
+    input_report_rel(dev, INPUT_REL_WHEEL, -(int)fy, true, K_NO_WAIT);
 
-        if (abs_dy * DOMINANT_DENOMINATOR > abs_dx * DOMINANT_NUMERATOR) {
-            dx = 0;
-        } else if (abs_dx * DOMINANT_DENOMINATOR > abs_dy * DOMINANT_NUMERATOR) {
-            dy = 0;
-        } else {
-            dx = 0;
-            dy = 0;
-        }
-
-        process_arrow_axis(dev, dx, &data->arrow_residue_x, INPUT_BTN_1, INPUT_BTN_0);
-
-        process_arrow_axis(dev, dy, &data->arrow_residue_y, INPUT_BTN_3, INPUT_BTN_2);
-    } else {
-        uint8_t a320_led_brt = indicator_tp_get_last_valid_brightness();
-        float a320_factor = 0.4f + 0.01f * a320_led_brt;
-
-        float slow_mult = slow_key_pressed ? SLOW_KEY_MULTIPLIER : 1.0f;
-
-        float fx = dx * 3 / 4 * a320_factor * slow_mult;
-        float fy = dy * 3 / 4 * a320_factor * slow_mult;
-
-        input_report_rel(dev, INPUT_REL_HWHEEL, (int)fx, false, K_NO_WAIT);
-        input_report_rel(dev, INPUT_REL_WHEEL, -(int)fy, true, K_NO_WAIT);
-    }
-
-    last_arrow_key_pressed = arrow_key_pressed;
     touched = false;
     data->last_packet_time = now;
 }
